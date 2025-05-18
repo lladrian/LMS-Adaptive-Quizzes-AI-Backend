@@ -14,6 +14,7 @@ const StudentSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  joined_classroom: [Number],
   created_at: {
     type: String,
     default: null
