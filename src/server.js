@@ -6,6 +6,9 @@ import adminRoutes from "./routes/admin_routes.js";
 import instructorRoutes from "./routes/instructor_routes.js";
 import studentRoutes from "./routes/student_routes.js";
 import classroomRoutes from "./routes/classroom_routes.js";
+import aiRoutes from "./routes/ai_routes.js";
+
+
 
 dotenv.config();
 const app = express();
@@ -19,6 +22,10 @@ app.use("/admins", adminRoutes);
 app.use("/instructors", instructorRoutes);
 app.use("/students", studentRoutes);
 app.use("/classrooms", classroomRoutes);
+app.use("/ai", aiRoutes);
+
+
+
 
 connectDB();
 
