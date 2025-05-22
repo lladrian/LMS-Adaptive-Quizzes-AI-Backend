@@ -7,6 +7,9 @@ import instructorRoutes from "./routes/instructor_routes.js";
 import studentRoutes from "./routes/student_routes.js";
 import classroomRoutes from "./routes/classroom_routes.js";
 import aiRoutes from "./routes/ai_routes.js";
+import examRoutes from "./routes/exam_routes.js";
+import answerRoutes from "./routes/answer_routes.js";
+
 
 
 
@@ -23,6 +26,8 @@ app.use("/instructors", instructorRoutes);
 app.use("/students", studentRoutes);
 app.use("/classrooms", classroomRoutes);
 app.use("/ai", aiRoutes);
+app.use("/exams", examRoutes);
+app.use("/answers", answerRoutes);
 
 
 

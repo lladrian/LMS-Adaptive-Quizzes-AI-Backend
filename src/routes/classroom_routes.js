@@ -3,9 +3,6 @@ import * as ClassroomController from '../controllers/classroom_controller.js'; /
 
 const classroomRoutes = Router();
 
-classroomRoutes.get('/ask', ClassroomController.ask);
-
-
 classroomRoutes.post('/add_classroom', ClassroomController.create_classroom);
 classroomRoutes.post('/student_join_classroom', ClassroomController.student_join_classroom);
 classroomRoutes.get('/student_leave_classroom/:classroom_id/:student_id', ClassroomController.student_leave_classroom);

@@ -20,17 +20,6 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 
 }
 
-export const ask = asyncHandler(async (req, res) => {
-    try {
-        const result = await ai_model.generateContent("What is Node.js?");
-        const response = await result.response;
-        const text = await response.text();
-        
-        return res.status(200).json({ data: text });
-    } catch (error) {
-        res.status(500).json({ message: "AI request failed." });
-    }
-});
 
 export const create_classroom = asyncHandler(async (req, res) => {
     const { classroom_name, subject, instructor, classroom_code } = req.body;
