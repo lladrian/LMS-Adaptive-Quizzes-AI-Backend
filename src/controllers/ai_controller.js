@@ -7,8 +7,10 @@ import ai_model from '../utils/gemini_ai.js';
 
 
 export const ask = asyncHandler(async (req, res) => {
+    const { ask } = req.body;
+
     try {
-        const result = await ai_model.generateContent("What is Node.js?");
+        const result = await ai_model.generateContent(ask);
         const response = await result.response;
         const text = await response.text();
         

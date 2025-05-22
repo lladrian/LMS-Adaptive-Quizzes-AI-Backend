@@ -3,6 +3,6 @@ import * as AIController from '../controllers/ai_controller.js'; // Import the c
 
 const aiRoutes = Router();
 
-aiRoutes.get('/ask', AIController.ask);
+aiRoutes.post('/ask', AIController.ask);
 
 export default aiRoutes;

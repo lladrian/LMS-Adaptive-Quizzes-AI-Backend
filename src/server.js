@@ -12,6 +12,8 @@ import answerRoutes from "./routes/answer_routes.js";
 import compilerRoutes from "./routes/compiler_routes.js";
 import languageRoutes from "./routes/language_routes.js";
 import practiceExamRoutes from "./routes/practice_exam_routes.js";
+import materialRoutes from "./routes/material_routes.js";
+
 
 
 
@@ -35,6 +37,8 @@ app.use("/answers", answerRoutes);
 app.use("/compilers", compilerRoutes);
 app.use("/languages", languageRoutes);
 app.use("/practice_exams", practiceExamRoutes);
+app.use("/materials", materialRoutes);
+
 
 
 

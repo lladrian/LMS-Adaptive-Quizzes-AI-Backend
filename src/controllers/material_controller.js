@@ -75,7 +75,6 @@ export const get_specific_material = asyncHandler(async (req, res) => {
     }
 });
 
-
 export const update_material = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
     const { classroom_id, material } = req.body;
