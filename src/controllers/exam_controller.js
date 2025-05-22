@@ -86,15 +86,17 @@ export const update_exam = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: "Please provide all fields (classroom_id, instruction)." });
         }
 
-        const updatedExam = await Exam.findByIdAndUpdate(
-        id, 
-        { classroom : classroom_id, instruction : instruction, submission_time : time_limit }, // Fields to update
-        { new: true, runValidators: true }
-        );
+        const updatedExam = await Exam.findById(id);
 
         if (!updatedExam) {
             return res.status(404).json({ message: "Exam not found" });
         }
+        
+        updatedExam.classroom = classroom_id ? classroom_id : updatedExam.classroom;
+        updatedExam.instruction = instruction ? instruction : updatedExam.instruction;
+        updatedExam.submission_time = time_limit ? time_limit : updatedExam.submission_time;
+                
+        await updatedExam.save();
 
         return res.status(200).json({ data: 'Exam successfully updated.' });
     } catch (error) {

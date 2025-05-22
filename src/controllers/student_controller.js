@@ -16,7 +16,6 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 
     // Return both current and expiration date-time
     return formattedExpirationDateTime;
-
 }
 
 
@@ -113,15 +112,16 @@ export const update_student = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: "All fields are required: email and fullname." });
         }
 
-        const updatedStudent = await Student.findByIdAndUpdate(
-        id, 
-        { email : email, fullname : fullname }, // Fields to update
-        { new: true, runValidators: true }
-        );
-
+        const updatedStudent = await Student.findById(id);
+                           
         if (!updatedStudent) {
             return res.status(404).json({ message: "Student not found" });
         }
+                        
+        updatedStudent.email = email ? email : updatedStudent.email;
+        updatedStudent.fullname = fullname ? fullname : updatedStudent.fullname;
+                                
+        await updatedStudent.save();
 
         return res.status(200).json({ data: 'Student account successfully updated.' });
     } catch (error) {
@@ -139,17 +139,17 @@ export const update_student_password = asyncHandler(async (req, res) => {
         if (!password) {
             return res.status(400).json({ message: "All fields are required: password." });
         }
+
         const hash = hashConverterMD5(password);
-
-        const updatedStudent = await Student.findByIdAndUpdate(
-        id, 
-        { password : hash }, // Fields to update
-        { new: true, runValidators: true }
-        );
-
+        const updatedStudent = await Student.findById(id);
+                           
         if (!updatedStudent) {
             return res.status(404).json({ message: "Student not found" });
         }
+                        
+        updatedStudent.password = password ? hash : updatedStudent.password;
+                                
+        await updatedStudent.save();
 
         return res.status(200).json({ data: 'Student password successfully updated.' });
     } catch (error) {

@@ -156,19 +156,20 @@ export const update_classroom = asyncHandler(async (req, res) => {
     const { classroom_name, subject } = req.body;
 
     try {
-        if (!email || !fullname) {
-            return res.status(400).json({ message: "All fields are required: email and fullname." });
+        if (!classroom_name || !subject) {
+            return res.status(400).json({ message: "All fields are required: classroom_name and subject." });
         }
 
-        const updatedClassroom = await Classroom.findByIdAndUpdate(
-        id, 
-        { classroom_name : classroom_name, subject : subject }, // Fields to update
-        { new: true, runValidators: true }
-        );
-
+        const updatedClassroom = await Classroom.findById(id);
+                   
         if (!updatedClassroom) {
             return res.status(404).json({ message: "Classroom not found" });
         }
+                
+        updatedClassroom.classroom_name = classroom_name ? classroom_name : updatedClassroom.classroom_name;
+        updatedClassroom.subject = subject ? subject : updatedClassroom.subject;
+                        
+        await updatedClassroom.save();
 
         return res.status(200).json({ data: 'Classroom successfully updated.' });
     } catch (error) {

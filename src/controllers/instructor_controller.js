@@ -113,15 +113,16 @@ export const update_instructor = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: "All fields are required: email and fullname." });
         }
 
-        const updatedInstructor = await Instructor.findByIdAndUpdate(
-        id, 
-        { email : email, fullname : fullname }, // Fields to update
-        { new: true, runValidators: true }
-        );
-
+        const updatedInstructor = await Instructor.findById(id);
+                   
         if (!updatedInstructor) {
             return res.status(404).json({ message: "Instructor not found" });
         }
+                
+        updatedInstructor.email = email ? email : updatedInstructor.email;
+        updatedInstructor.fullname = fullname ? fullname : updatedInstructor.fullname;
+                        
+        await updatedInstructor.save();
 
         return res.status(200).json({ data: 'Instructor account successfully updated.' });
     } catch (error) {
@@ -140,16 +141,14 @@ export const update_instructor_password = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: "All fields are required: password." });
         }
         const hash = hashConverterMD5(password);
-
-        const updatedInstructor = await Instructor.findByIdAndUpdate(
-        id, 
-        { password : hash }, // Fields to update
-        { new: true, runValidators: true }
-        );
-
+        const updatedInstructor = await Instructor.findById(id);
+                   
         if (!updatedInstructor) {
             return res.status(404).json({ message: "Instructor not found" });
         }
+                
+        updatedInstructor.password = password ? hash : updatedInstructor.password; 
+        await updatedInstructor.save();
 
         return res.status(200).json({ data: 'Instructor password successfully updated.' });
     } catch (error) {

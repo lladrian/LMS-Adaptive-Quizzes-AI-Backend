@@ -115,7 +115,7 @@ export const create_answer = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: 'Not yet taking the exam.' });
         }
     
- 
+  
         answer.line_of_code = line_of_code;
         answer.submitted_at = storeCurrentDate(0, 'hours');
 

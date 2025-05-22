@@ -113,15 +113,16 @@ export const update_admin = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: "All fields are required: email and fullname." });
         }
 
-        const updatedAdmin = await Admin.findByIdAndUpdate(
-        id, 
-        { email : email, fullname : fullname }, // Fields to update
-        { new: true, runValidators: true }
-        );
-
+        const updatedAdmin = await Admin.findById(id);
+           
         if (!updatedAdmin) {
             return res.status(404).json({ message: "Admin not found" });
         }
+        
+        updatedAdmin.email = email ? email : updatedAdmin.email;
+        updatedAdmin.fullname = fullname ? fullname : updatedAdmin.fullname;
+                
+        await updatedAdmin.save();
 
         return res.status(200).json({ data: 'Admin account successfully updated.' });
     } catch (error) {
@@ -139,17 +140,17 @@ export const update_admin_password = asyncHandler(async (req, res) => {
         if (!password) {
             return res.status(400).json({ message: "All fields are required: password." });
         }
+
         const hash = hashConverterMD5(password);
-
-        const updatedAdmin = await Admin.findByIdAndUpdate(
-        id, 
-        { password : hash }, // Fields to update
-        { new: true, runValidators: true }
-        );
-
+        const updatedAdmin = await Admin.findById(id);
+           
         if (!updatedAdmin) {
             return res.status(404).json({ message: "Admin not found" });
         }
+        
+        updatedAdmin.password = password ? hash : updatedAdmin.password;
+                
+        await updatedAdmin.save();
 
         return res.status(200).json({ data: 'Admin password successfully updated.' });
     } catch (error) {
