@@ -6,7 +6,4 @@ const compilerRoutes = Router();
 compilerRoutes.post('/run_code', CompilerController.run_code);
 compilerRoutes.get('/run_time', CompilerController.run_time);
 
-
-
-
 export default compilerRoutes;
