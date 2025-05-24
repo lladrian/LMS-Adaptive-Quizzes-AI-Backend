@@ -11,7 +11,7 @@ const ExamSchema = new mongoose.Schema({
     required: true
   },
   submission_time: { 
-    type: String, 
+    type: Number, 
     required: true
   },
   created_at: {

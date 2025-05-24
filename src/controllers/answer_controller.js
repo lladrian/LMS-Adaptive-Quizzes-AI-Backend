@@ -98,6 +98,7 @@ export const create_answer = asyncHandler(async (req, res) => {
         }
    
         const exam = await Exam.findById(exam_id);
+       
         const answer = await Answer.findOne({
             exam: exam_id,
             student: student_id
@@ -106,8 +107,8 @@ export const create_answer = asyncHandler(async (req, res) => {
         if (answer) {
             const opened_exam = moment.tz(answer.opened_at, "YYYY-MM-DD HH:mm:ss", 'Asia/Manila');
             const diffMinutes = now.diff(opened_exam, 'minutes');
-        
 
+            //if (diffMinutes >= exam.submission_time) {
             if (diffMinutes >= 1) {
                 return res.status(400).json({ message: 'Sorry! You can no longer submit your exam. The time is up.' });
             }

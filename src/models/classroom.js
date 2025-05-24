@@ -5,7 +5,7 @@ const ClassroomSchema = new mongoose.Schema({
     type: String,
     required: true
   }, 
-  subject: {
+  subject_code: {
     type: String,
     required: true
   }, 

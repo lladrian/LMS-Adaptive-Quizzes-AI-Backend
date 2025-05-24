@@ -2,6 +2,11 @@
 2.  npm moment-timezone express-async-handler
 3.  npm install @google/generative-ai
 4.  npm install axios
+5.  npm install multer
+6.  npm install pdf-parse
+7.  npm install mammoth
+
+
 
 
 
