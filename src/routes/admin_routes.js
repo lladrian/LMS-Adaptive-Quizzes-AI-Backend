@@ -5,7 +5,7 @@ const adminRoutes = Router();
 
 
 adminRoutes.post('/add_admin', AdminController.create_admin);
-adminRoutes.post('/login_admin', AdminController.login_admin);
+//adminRoutes.post('/login_admin', AdminController.login_admin);
 adminRoutes.put('/update_admin/:id', AdminController.update_admin);
 adminRoutes.put('/update_admin_password/:id', AdminController.update_admin_password);
 adminRoutes.get('/get_all_admin', AdminController.get_all_admin);

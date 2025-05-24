@@ -5,7 +5,7 @@ const instructorRoutes = Router();
 
 
 instructorRoutes.post('/add_instructor', InstructorController.create_instructor);
-instructorRoutes.post('/login_instructor', InstructorController.login_instructor);
+//instructorRoutes.post('/login_instructor', InstructorController.login_instructor);
 instructorRoutes.put('/update_instructor/:id', InstructorController.update_instructor);
 instructorRoutes.put('/update_instructor_password/:id', InstructorController.update_instructor_password);
 instructorRoutes.get('/get_all_instructor', InstructorController.get_all_instructor);

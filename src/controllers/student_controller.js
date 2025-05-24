@@ -3,6 +3,8 @@ import asyncHandler from 'express-async-handler';
 import moment from 'moment-timezone';
 import dotenv from 'dotenv';
 import Student from '../models/student.js';
+import Admin from '../models/admin.js';
+import Instructor from '../models/instructor.js';
 
 
 function storeCurrentDate(expirationAmount, expirationUnit) {
@@ -34,7 +36,11 @@ export const create_student = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: "Please provide all fields (email, password, fullname)." });
         }
 
+
         if (await Student.findOne({ email })) return res.status(400).json({ message: 'Email already exists' });
+        if (await Admin.findOne({ email })) return res.status(400).json({ message: 'Email already exists' });
+        if (await Instructor.findOne({ email })) return res.status(400).json({ message: 'Email already exists' });
+
 
         const hash_password = hashConverterMD5(password);
    
@@ -77,29 +83,29 @@ export const get_specific_student = asyncHandler(async (req, res) => {
 });
 
 
-export const login_student = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+// export const login_student = asyncHandler(async (req, res) => {
+//   const { email, password } = req.body;
 
-    try {
-        // Check if both email and password are provided
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Please provide both email and password' });
-        }
+//     try {
+//         // Check if both email and password are provided
+//         if (!email || !password) {
+//             return res.status(400).json({ message: 'Please provide both email and password' });
+//         }
 
-        // Find the user by email
-        let student = await Student.findOne({ email: email }); // Don't use .lean() here
-        const hash = hashConverterMD5(password);
+//         // Find the user by email
+//         let student = await Student.findOne({ email: email }); // Don't use .lean() here
+//         const hash = hashConverterMD5(password);
 
-        // Check if the admin exists and if the password is correct
-        if (student && student.password == hash) {
-            return res.status(200).json({ data: student });
-        }
+//         // Check if the admin exists and if the password is correct
+//         if (student && student.password == hash) {
+//             return res.status(200).json({ data: student });
+//         }
 
-        return res.status(400).json({ message: 'Wrong email or password.'});
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to login ' });
-    }
-});
+//         return res.status(400).json({ message: 'Wrong email or password.'});
+//     } catch (error) {
+//         return res.status(500).json({ error: 'Failed to login ' });
+//     }
+// });
 
 
 
