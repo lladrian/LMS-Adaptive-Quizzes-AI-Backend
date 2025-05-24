@@ -3,6 +3,7 @@ import moment from 'moment-timezone';
 import dotenv from 'dotenv';
 import Classroom from '../models/classroom.js';
 import Student from '../models/student.js';
+import Instructor from '../models/instructor.js';
 import ai_model from '../utils/gemini_ai.js';
 
 
@@ -144,6 +145,24 @@ export const get_all_classroom_specific_student = asyncHandler(async (req, res) 
         }).populate('instructor');
 
         if (!student) return res.status(404).json({ message: 'Student not found.' });
+
+        return res.status(200).json({ data: classrooms });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all classrooms.' });
+    }
+});
+
+export const get_all_classroom_specific_instructor = asyncHandler(async (req, res) => {  
+    const { instructor_id } = req.params; // Get the meal ID from the request parameters
+  
+    try {
+        const instructor = await Instructor.findById(instructor_id);
+
+        const classrooms = await Classroom.find({ 
+            instructor: instructor.id 
+        }).populate('instructor');
+
+        if (!instructor) return res.status(404).json({ message: 'Instructor not found.' });
 
         return res.status(200).json({ data: classrooms });
     } catch (error) {

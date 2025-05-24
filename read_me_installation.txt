@@ -8,4 +8,5 @@
 
 ## Ask AI
 1. EXAM - "Give me one simple programming exam using Python programming do not give any solutions just instructions only."
+2. EXAM - "Give me one simple programming exam using Python programming. Do not give any solutions and instructions, just problems only."
 
