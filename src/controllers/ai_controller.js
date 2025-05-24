@@ -12,9 +12,20 @@ export const ask = asyncHandler(async (req, res) => {
     try {
         const result = await ai_model.generateContent(ask);
         const response = await result.response;
-        const text = await response.text();
-        
-        return res.status(200).json({ data: text });
+        let text = await response.text();
+
+        // const lines = text.trim().split('\n');
+        // const responseObj = {};
+
+        // lines.forEach(line => {
+        //     const [key, ...value] = line.split(':');
+        //     if (key && value) {
+        //         responseObj[key.trim().toLowerCase()] = value.join(':').trim();
+        //     }
+        // });
+
+
+        return res.status(200).json({ data: text  });
     } catch (error) {
         res.status(500).json({ message: "AI request failed." });
     }

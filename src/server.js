@@ -1,6 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from "./config/db.js";
+import cors from 'cors';
+
 
 import adminRoutes from "./routes/admin_routes.js";
 import instructorRoutes from "./routes/instructor_routes.js";
@@ -18,12 +20,11 @@ import materialRoutes from "./routes/material_routes.js";
 
 
 
-
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
 
-
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
