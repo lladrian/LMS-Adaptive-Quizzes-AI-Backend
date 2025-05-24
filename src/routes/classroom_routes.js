@@ -9,6 +9,7 @@ classroomRoutes.get('/student_leave_classroom/:classroom_id/:student_id', Classr
 classroomRoutes.get('/get_all_classroom', ClassroomController.get_all_classroom);
 classroomRoutes.get('/get_all_classroom_student/:classroom_id', ClassroomController.get_all_classroom_student);
 classroomRoutes.get('/get_all_classroom_specific_student/:student_id', ClassroomController.get_all_classroom_specific_student);
+classroomRoutes.get('/get_all_classroom_specific_instructor/:instructor_id', ClassroomController.get_all_classroom_specific_instructor);
 classroomRoutes.put('/update_classroom/:id', ClassroomController.update_classroom);
 classroomRoutes.delete('/delete_classroom/:id', ClassroomController.delete_classroom);
 

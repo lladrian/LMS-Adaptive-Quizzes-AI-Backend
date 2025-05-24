@@ -3,6 +3,16 @@ import moment from 'moment-timezone';
 import dotenv from 'dotenv';
 import Material from '../models/material.js';
 
+import pdf from 'pdf-parse';
+import mammoth from 'mammoth';
+import path from 'path';
+import fs from 'fs'; // Import fs to check if the directory exists
+import { fileURLToPath } from 'url'; // Import fileURLToPath
+import { dirname, join } from 'path'; // Import dirname
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const uploadsDir = path.join(__dirname, '../../uploads/');
+
 function storeCurrentDate(expirationAmount, expirationUnit) {
     // Get the current date and time in Asia/Manila timezone
     const currentDateTime = moment.tz("Asia/Manila");
@@ -16,18 +26,53 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
     return formattedExpirationDateTime;
 }
 
+export const extract_material = asyncHandler(async (req, res) => {
+    const { material_id } = req.params; // Get the meal ID from the request parameters
+    
+    try {
+        const material = await Material.findById(material_id);
+
+        if (!material) {
+            return res.status(404).json({ message: 'Material not found.' });
+        }
+
+        const filePath = path.join(uploadsDir, material.material);
+        const ext = path.extname(filePath).toLowerCase();
+
+        if (material.material && ext === '.pdf') {
+           let text = "";
+           const dataBuffer = fs.readFileSync(path.join(uploadsDir, material.material));
+           const pdfData = await pdf(dataBuffer);
+           text = pdfData.text;
+
+           return res.status(200).json({ data: text });
+        }
+
+        if (material.material && ext === '.docx') {
+            const result = await mammoth.extractRawText({ path: filePath });
+            return res.status(200).json({ data: result.value });
+        }
+
+         return res.status(200).json({ error: 'Neither PDF nor DOCX file material.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to extract material.' });
+    }
+});
+
 export const create_material = asyncHandler(async (req, res) => {
-    const { classroom_id, material } = req.body;
+    const { classroom_id } = req.body;
+    const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
+    const filename_insert = `materials/${filename}`; 
     
     try {
         // Check if all required fields are provided
-        if (!classroom_id || !material) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, material)." });
+        if (!classroom_id) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id)." });
         }
    
         const newMaterial = new Material({
             classroom: classroom_id,
-            material: material,
+            material: req.file ? filename_insert : null,
             created_at: storeCurrentDate(0, 'hours'),
         });
 
@@ -77,18 +122,30 @@ export const get_specific_material = asyncHandler(async (req, res) => {
 
 export const update_material = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { classroom_id, material } = req.body;
+    const { classroom_id } = req.body;
+    const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
+    const filename_insert = `materials/${filename}`; 
 
     try {
-        if (!classroom_id || !material) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, material)." });
+        if (!classroom_id) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id)." });
         }
 
         const updatedMaterial = await Material.findById(id);
 
         updatedMaterial.classroom = classroom_id ? classroom_id : updatedMaterial.classroom;
-        updatedMaterial.material = material ? material : updatedMaterial.material;
+        updatedMaterial.material = req.file ? filename_insert : updatedMaterial.material;
         
+        if(req.file) {
+            const filePath = path.join(uploadsDir, updatedMaterial.material);
+        
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    console.error('Error deleting file:', err);
+                }
+            });
+        }
+
         await updatedMaterial.save();
 
         return res.status(200).json({ data: 'Material successfully updated.' });
