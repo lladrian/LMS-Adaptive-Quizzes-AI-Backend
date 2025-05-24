@@ -41,7 +41,7 @@ export const extract_material = asyncHandler(async (req, res) => {
 
         if (material.material && ext === '.pdf') {
            let text = "";
-           const dataBuffer = fs.readFileSync(path.join(uploadsDir, material.material));
+           const dataBuffer = fs.readFileSync(filePath);
            const pdfData = await pdf(dataBuffer);
            text = pdfData.text;
 
@@ -50,10 +50,11 @@ export const extract_material = asyncHandler(async (req, res) => {
 
         if (material.material && ext === '.docx') {
             const result = await mammoth.extractRawText({ path: filePath });
+
             return res.status(200).json({ data: result.value });
         }
 
-         return res.status(200).json({ error: 'Neither PDF nor DOCX file material.' });
+         return res.status(200).json({ data: 'No file material or neither PDF nor DOCX file material.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to extract material.' });
     }

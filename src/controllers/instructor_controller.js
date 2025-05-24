@@ -89,6 +89,7 @@ export const login_instructor = asyncHandler(async (req, res) => {
 
         // Find the user by email
         let instructor = await Instructor.findOne({ email: email }); // Don't use .lean() here
+        const hash = hashConverterMD5(password);
 
         // Check if the admin exists and if the password is correct
         if (instructor && instructor.password == hash) {

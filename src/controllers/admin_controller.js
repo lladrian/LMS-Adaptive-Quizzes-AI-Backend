@@ -89,6 +89,8 @@ export const login_admin = asyncHandler(async (req, res) => {
 
         // Find the user by email
         let admin = await Admin.findOne({ email: email }); // Don't use .lean() here
+        const hash = hashConverterMD5(password);
+
 
         // Check if the admin exists and if the password is correct
         if (admin && admin.password == hash) {
