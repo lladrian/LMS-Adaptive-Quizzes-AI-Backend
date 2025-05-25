@@ -14,6 +14,10 @@ const InstructorSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  role: {
+    type: String,
+    default: "instructor"
+  },
   created_at: {
     type: String,
     default: null

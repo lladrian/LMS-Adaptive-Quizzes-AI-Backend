@@ -14,6 +14,10 @@ const StudentSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  role: {
+    type: String,
+    default: "student"
+  },
   joined_classroom: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Classroom'
