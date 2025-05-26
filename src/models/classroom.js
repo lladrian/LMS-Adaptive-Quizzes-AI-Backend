@@ -9,6 +9,10 @@ const ClassroomSchema = new mongoose.Schema({
     type: String,
     required: true
   }, 
+  description: {
+    type: String,
+    required: true
+  }, 
   instructor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Instructor', // reference to the Instructor model

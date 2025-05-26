@@ -23,12 +23,12 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 
 
 export const create_classroom = asyncHandler(async (req, res) => {
-    const { classroom_name, subject_code, instructor, classroom_code } = req.body;
+    const { classroom_name, subject_code, instructor, classroom_code, description } = req.body;
     
     try {
         // Check if all required fields are provided
         if (!classroom_name || !subject_code || !instructor || !classroom_code) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_name, subject_code, instructor, classroom_code)." });
+            return res.status(400).json({ message: "Please provide all fields (classroom_name, subject_code, instructor, classroom_code, description)." });
         }
    
         const newClassroom = new Classroom({
@@ -36,6 +36,7 @@ export const create_classroom = asyncHandler(async (req, res) => {
             subject_code: subject_code,
             instructor: instructor,
             classroom_code: classroom_code,
+            description: description,
             created_at: storeCurrentDate(0, 'hours'),
         });
 
@@ -172,11 +173,11 @@ export const get_all_classroom_specific_instructor = asyncHandler(async (req, re
 
 export const update_classroom = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { classroom_name, subject_code } = req.body;
+    const { classroom_name, subject_code, description } = req.body;
 
     try {
-        if (!classroom_name || !subject_code) {
-            return res.status(400).json({ message: "All fields are required: classroom_name and subject_code." });
+        if (!classroom_name || !subject_code || !description) {
+            return res.status(400).json({ message: "All fields are required: classroom_name, description and subject_code." });
         }
 
         const updatedClassroom = await Classroom.findById(id);
@@ -185,6 +186,7 @@ export const update_classroom = asyncHandler(async (req, res) => {
             return res.status(404).json({ message: "Classroom not found" });
         }
                 
+        updatedClassroom.description = description ? description : updatedClassroom.description;
         updatedClassroom.classroom_name = classroom_name ? classroom_name : updatedClassroom.classroom_name;
         updatedClassroom.subject_code = subject_code ? subject_code : updatedClassroom.subject_code;
                         
