@@ -183,7 +183,7 @@ export const get_specific_classroom = asyncHandler(async (req, res) => {
     const { classroom_id } = req.params; // Get the meal ID from the request parameters
  
     try {
-        const classroom = await Classroom.findById(classroom_id);  
+        const classroom = await Classroom.findById(classroom_id).populate('instructor');  
 
         if (!classroom) {
             return res.status(404).json({ message: 'Classroom not found.' });
