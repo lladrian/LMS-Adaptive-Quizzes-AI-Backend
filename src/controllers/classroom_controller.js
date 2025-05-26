@@ -6,6 +6,7 @@ import Student from '../models/student.js';
 import Instructor from '../models/instructor.js';
 import Exam from '../models/exam.js';
 import Quiz from '../models/quiz.js';
+import Material from '../models/material.js';
 import ai_model from '../utils/gemini_ai.js';
 
 
@@ -196,11 +197,15 @@ export const get_specific_classroom = asyncHandler(async (req, res) => {
             classroom : classroom.id,
         });
 
+        const materials = await Material.find({ 
+            classroom : classroom.id,
+        });
+
         const students = await Student.find({ 
             joined_classroom: classroom.id 
         });
 
-        return res.status(200).json({ data: {classroom, exams, quizzes, students} });
+        return res.status(200).json({ data: {classroom, exams, quizzes, materials, students} });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all classrooms.' });
     }
