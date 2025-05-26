@@ -1,7 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import moment from 'moment-timezone';
 import dotenv from 'dotenv';
-import Exam from '../models/exam.js';
+import Quiz from '../models/quiz.js';
 
 function storeCurrentDate(expirationAmount, expirationUnit) {
     // Get the current date and time in Asia/Manila timezone
@@ -16,7 +16,7 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
     return formattedExpirationDateTime;
 }
 
-export const create_exam = asyncHandler(async (req, res) => {
+export const create_quiz = asyncHandler(async (req, res) => {
     const { classroom_id, instruction, time_limit } = req.body;
     
     try {
@@ -25,22 +25,22 @@ export const create_exam = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: "Please provide all fields (classroom_id, instruction, time_limit)." });
         }
    
-        const newExam = new Exam({
+        const newQuiz = new Quiz({
             classroom: classroom_id,
             instruction: instruction,
             submission_time: time_limit,
             created_at: storeCurrentDate(0, 'hours'),
         });
 
-        await newExam.save();
+        await newQuiz.save();
 
-        return res.status(200).json({ message: 'New exam successfully created.' });
+        return res.status(200).json({ message: 'New quiz successfully created.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to create exam.' });
+        return res.status(500).json({ error: 'Failed to create quiz.' });
     }
 });
 
-export const get_all_exam_specific_classroom = asyncHandler(async (req, res) => {  
+export const get_all_quiz_specific_classroom = asyncHandler(async (req, res) => {  
     const { classroom_id } = req.params; // Get the meal ID from the request parameters
   
     try {
@@ -50,34 +50,34 @@ export const get_all_exam_specific_classroom = asyncHandler(async (req, res) => 
             return res.status(404).json({ message: 'Classroom not found.' });
         }
 
-        const exams = await Exam.find({ 
+        const quizzes = await Quiz.find({ 
             classroom: classroom.id 
         });
 
-        return res.status(200).json({ data: exams });
+        return res.status(200).json({ data: quizzes });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to get all exams in specific classroom.' });
+        return res.status(500).json({ error: 'Failed to get all quizzes in specific classroom.' });
     }
 });
 
-export const get_specific_exam = asyncHandler(async (req, res) => {  
-    const { exam_id } = req.params; // Get the meal ID from the request parameters
+export const get_specific_quiz = asyncHandler(async (req, res) => {  
+    const { quiz_id } = req.params; // Get the meal ID from the request parameters
   
     try {
-        const exam = await Exam.findById(exam_id).populate('classroom');
+        const quiz = await Quiz.findById(quiz_id).populate('classroom');
 
-        if (!exam) {
-            return res.status(404).json({ message: 'Exam not found.' });
+        if (!quiz) {
+            return res.status(404).json({ message: 'Quiz not found.' });
         }
 
-        return res.status(200).json({ data: exam });
+        return res.status(200).json({ data: quiz });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to get specific exam.' });
+        return res.status(500).json({ error: 'Failed to get specific quiz.' });
     }
 });
 
 
-export const update_exam = asyncHandler(async (req, res) => {    
+export const update_quiz = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
     const { classroom_id, instruction, time_limit } = req.body;
 
@@ -86,35 +86,35 @@ export const update_exam = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: "Please provide all fields (classroom_id, instruction)." });
         }
 
-        const updatedExam = await Exam.findById(id);
+        const updatedQuiz = await Quiz.findById(id);
 
-        if (!updatedExam) {
-            return res.status(404).json({ message: "Exam not found" });
+        if (!updatedQuiz) {
+            return res.status(404).json({ message: "Quiz not found" });
         }
         
-        updatedExam.classroom = classroom_id ? classroom_id : updatedExam.classroom;
-        updatedExam.instruction = instruction ? instruction : updatedExam.instruction;
-        updatedExam.submission_time = time_limit ? time_limit : updatedExam.submission_time;
+        updatedQuiz.classroom = classroom_id ? classroom_id : updatedQuiz.classroom;
+        updatedQuiz.instruction = instruction ? instruction : updatedQuiz.instruction;
+        updatedQuiz.submission_time = time_limit ? time_limit : updatedQuiz.submission_time;
                 
-        await updatedExam.save();
+        await updatedQuiz.save();
 
-        return res.status(200).json({ data: 'Exam successfully updated.' });
+        return res.status(200).json({ data: 'Quiz successfully updated.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to update exam.' });
+        return res.status(500).json({ error: 'Failed to update quiz.' });
     }
 });
 
 
-export const delete_exam = asyncHandler(async (req, res) => {    
+export const delete_quiz = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
 
     try {
-        const deletedExam = await Exam.findByIdAndDelete(id);
+        const deletedQuiz = await Quiz.findByIdAndDelete(id);
 
-        if (!deletedExam) return res.status(404).json({ message: 'Exam not found' });
+        if (!deletedQuiz) return res.status(404).json({ message: 'Quiz not found' });
 
-        return res.status(200).json({ data: 'Exam successfully deleted.' });
+        return res.status(200).json({ data: 'Quiz successfully deleted.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to delete exam.' });
+        return res.status(500).json({ error: 'Failed to delete quiz.' });
     }
 });

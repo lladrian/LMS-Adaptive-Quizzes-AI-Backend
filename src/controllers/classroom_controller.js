@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import Classroom from '../models/classroom.js';
 import Student from '../models/student.js';
 import Instructor from '../models/instructor.js';
+import Exam from '../models/exam.js';
+import Quiz from '../models/quiz.js';
 import ai_model from '../utils/gemini_ai.js';
 
 
@@ -45,6 +47,57 @@ export const create_classroom = asyncHandler(async (req, res) => {
         return res.status(200).json({ message: 'New classroom successfully created.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to create classroom.' });
+    }
+});
+
+
+export const add_student_classroom = asyncHandler(async (req, res) => {
+    const { classroom_id, student_id } = req.params; // Get the meal ID from the request parameters
+    
+    try {
+        const classroom = await Classroom.findById(classroom_id);
+        const student = await Student.findById(student_id);
+
+        if (!classroom) return res.status(400).json({ message: 'Classroom not found' });
+        if (!student) return res.status(404).json({ message: 'Student not found.' });
+
+        if (student.joined_classroom.includes(classroom.id)) {
+            return res.status(400).json({ message: 'Classroom already exists.' });
+        }
+
+        student.joined_classroom.push(classroom.id);
+        await student.save();
+
+        return res.status(200).json({ message: 'Student joined classroom successfully.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to joined classroom.' });
+    }
+});
+
+export const remove_student_classroom = asyncHandler(async (req, res) => {
+    const { classroom_id, student_id } = req.params; // Get the meal ID from the request parameters
+    
+    try {
+        const classroom = await Classroom.findById(classroom_id);
+        const student = await Student.findById(student_id);
+
+        if (!classroom) return res.status(400).json({ message: 'Classroom not found' });
+        if (!student) return res.status(404).json({ message: 'Student not found.' });
+
+        if (student.joined_classroom.includes(classroom.id)) {
+            return res.status(400).json({ message: 'Classroom already exists.' });
+        }
+
+        // Remove classroom ID from the array
+        student.joined_classroom = student.joined_classroom.filter(
+            id => id.toString() !== classroom.id.toString()
+        );
+
+        await student.save();
+
+        return res.status(200).json({ message: 'Student joined classroom successfully.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to joined classroom.' });
     }
 });
 
@@ -120,6 +173,34 @@ export const get_all_classroom_student = asyncHandler(async (req, res) => {
         }
 
         return res.status(200).json({ data: {classroom, students} });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all classrooms.' });
+    }
+});
+
+export const get_specific_classroom = asyncHandler(async (req, res) => {   
+    const { classroom_id } = req.params; // Get the meal ID from the request parameters
+ 
+    try {
+        const classroom = await Classroom.findById(classroom_id);  
+
+        if (!classroom) {
+            return res.status(404).json({ message: 'Classroom not found.' });
+        }
+
+        const exams = await Exam.find({ 
+            classroom : classroom.id,
+        });
+
+        const quizzes = await Quiz.find({ 
+            classroom : classroom.id,
+        });
+
+        const students = await Student.find({ 
+            joined_classroom: classroom.id 
+        });
+
+        return res.status(200).json({ data: {classroom, exams, quizzes, students} });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all classrooms.' });
     }
