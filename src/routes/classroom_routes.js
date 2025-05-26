@@ -14,8 +14,8 @@ classroomRoutes.get('/get_all_classroom_student/:classroom_id', ClassroomControl
 classroomRoutes.get('/get_all_classroom_specific_student/:student_id', ClassroomController.get_all_classroom_specific_student);
 classroomRoutes.get('/get_all_classroom_specific_instructor/:instructor_id', ClassroomController.get_all_classroom_specific_instructor);
 classroomRoutes.put('/update_classroom/:id', ClassroomController.update_classroom);
-classroomRoutes.delete('/delete_classroom/:id', ClassroomController.delete_classroom);
-
+classroomRoutes.get('/hide_classroom/:id', ClassroomController.hide_classroom);
+classroomRoutes.get('/unhide_classroom/:id', ClassroomController.unhide_classroom);
 
 
 export default classroomRoutes;

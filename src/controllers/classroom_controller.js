@@ -207,7 +207,7 @@ export const get_specific_classroom = asyncHandler(async (req, res) => {
 
         return res.status(200).json({ data: {classroom, exams, quizzes, materials, students} });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to get all classrooms.' });
+        return res.status(500).json({ error: 'Failed to get data.' });
     }
 });
 
@@ -228,7 +228,8 @@ export const get_all_classroom_specific_student = asyncHandler(async (req, res) 
     try {
         const student = await Student.findById(student_id);
         const classrooms = await Classroom.find({
-        _id: { $in: student.joined_classroom }
+            _id: { $in: student.joined_classroom },
+            is_hidden: 0
         }).populate('instructor');
 
         if (!student) return res.status(404).json({ message: 'Student not found.' });
@@ -246,7 +247,8 @@ export const get_all_classroom_specific_instructor = asyncHandler(async (req, re
         const instructor = await Instructor.findById(instructor_id);
 
         const classrooms = await Classroom.find({ 
-            instructor: instructor.id 
+            instructor: instructor.id,
+            is_hidden: 0
         }).populate('instructor');
 
         if (!instructor) return res.status(404).json({ message: 'Instructor not found.' });
@@ -285,15 +287,41 @@ export const update_classroom = asyncHandler(async (req, res) => {
 });
 
 
-export const delete_classroom = asyncHandler(async (req, res) => {    
+export const hide_classroom = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
 
     try {
-        const deletedClassroom = await Classroom.findByIdAndDelete(id);
+        const classroom = await Classroom.findById(id);
+                   
+        if (!classroom) {
+            return res.status(404).json({ message: "Classroom not found" });
+        }
 
-        if (!deletedClassroom) return res.status(404).json({ message: 'Classroom not found' });
+        classroom.is_hidden = 1;
+                        
+        await classroom.save();
 
-        return res.status(200).json({ data: 'Classroom successfully deleted.' });
+        return res.status(200).json({ data: 'Classroom successfully is hidden.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to delete classroom.' });
+    }
+});
+
+export const unhide_classroom = asyncHandler(async (req, res) => {    
+    const { id } = req.params; // Get the meal ID from the request parameters
+
+    try {
+        const classroom = await Classroom.findById(id);
+                   
+        if (!classroom) {
+            return res.status(404).json({ message: "Classroom not found" });
+        }
+
+        classroom.is_hidden = 0;
+                        
+        await classroom.save();
+
+        return res.status(200).json({ data: 'Classroom successfully is softly unhidden.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to delete classroom.' });
     }

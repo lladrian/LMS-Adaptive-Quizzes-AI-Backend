@@ -23,6 +23,10 @@ const ClassroomSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  is_hidden: {
+    type: Number,
+    default: 0
+  }, 
   created_at: {
     type: String,
     default: null
