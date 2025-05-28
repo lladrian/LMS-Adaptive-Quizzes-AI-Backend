@@ -17,17 +17,17 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 }
 
 export const create_quiz = asyncHandler(async (req, res) => {
-    const { classroom_id, instruction, time_limit, title, description, points } = req.body;
+    const { classroom_id, question, time_limit, title, description, points } = req.body;
     
     try {
         // Check if all required fields are provided
-        if (!classroom_id || !instruction || !time_limit || !title || !description || !points) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, instruction, time_limit, title, description, points)." });
+        if (!classroom_id || !question || !time_limit || !title || !description || !points) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, question, time_limit, title, description, points)." });
         }
    
         const newQuiz = new Quiz({
             classroom: classroom_id,
-            instruction: instruction,
+            question: question,
             title: title,
             description: description,
             points: points,
@@ -82,11 +82,11 @@ export const get_specific_quiz = asyncHandler(async (req, res) => {
 
 export const update_quiz = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { classroom_id, instruction, time_limit, title, description, points } = req.body;
+    const { classroom_id, question, time_limit, title, description, points } = req.body;
 
     try {
-        if (!classroom_id || !instruction || !title || !description || !points) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, instruction, title, description, points)." });
+        if (!classroom_id || !question || !title || !description || !points) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, question, title, description, points)." });
         }
 
         const updatedQuiz = await Quiz.findById(id);
@@ -96,7 +96,7 @@ export const update_quiz = asyncHandler(async (req, res) => {
         }
         
         updatedQuiz.classroom = classroom_id ? classroom_id : updatedQuiz.classroom;
-        updatedQuiz.instruction = instruction ? instruction : updatedQuiz.instruction;
+        updatedQuiz.question = question ? question : updatedQuiz.question;
         updatedQuiz.title = title ? title : updatedQuiz.title;
         updatedQuiz.description = description ? description : updatedQuiz.description;
         updatedQuiz.points = points ? points : updatedQuiz.points;

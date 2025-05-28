@@ -6,7 +6,7 @@ const QuizSchema = new mongoose.Schema({
     ref: 'Classroom', // reference to the Instructor model
     required: true
   },
-  instruction: { 
+  question: { 
     type: String, 
     required: true
   },
