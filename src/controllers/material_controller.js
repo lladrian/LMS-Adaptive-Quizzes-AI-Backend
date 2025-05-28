@@ -135,6 +135,8 @@ export const update_material = asyncHandler(async (req, res) => {
         }
 
         const updatedMaterial = await Material.findById(id);
+        const material = await Material.findById(id);
+
 
         updatedMaterial.classroom = classroom_id ? classroom_id : updatedMaterial.classroom;
         updatedMaterial.description = description ? description : updatedMaterial.description;
@@ -142,7 +144,7 @@ export const update_material = asyncHandler(async (req, res) => {
         updatedMaterial.material = req.file ? filename_insert : updatedMaterial.material;
         
         if(req.file) {
-            const filePath = path.join(uploadsDir, updatedMaterial.material);
+            const filePath = path.join(uploadsDir, material.material);
         
             fs.unlink(filePath, (err) => {
                 if (err) {
