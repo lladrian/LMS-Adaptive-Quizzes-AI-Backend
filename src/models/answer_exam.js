@@ -15,6 +15,10 @@ const AnswerExamSchema = new mongoose.Schema({
     type: String, 
     required: false
   },
+  points: { 
+    type: Number, 
+    default: 0
+  },
   opened_at: {
     type: String,
     default: null

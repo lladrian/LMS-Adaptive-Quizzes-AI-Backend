@@ -129,3 +129,30 @@ export const create_answer = asyncHandler(async (req, res) => {
 });
 
 
+
+export const update_specific_student_exam_points = asyncHandler(async (req, res) => {    
+    const { answer_exam_id } = req.params; // Get the meal ID from the request parameters
+    const { points} = req.body;
+
+    try {
+        if (!points) {
+            return res.status(400).json({ message: "Please provide all fields (points)." });
+        }
+
+        const updatedAnswer = await AnswerExam.findById(answer_exam_id);
+
+        if (!updatedAnswer) {
+            return res.status(404).json({ message: "Exam not found" });
+        }
+        
+        updatedAnswer.points = points ? points : updatedAnswer.points;
+    
+        await updatedAnswer.save();
+
+        return res.status(200).json({ data: 'Exam successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update exam.' });
+    }
+});
+
+
