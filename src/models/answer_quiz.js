@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
-const AnswerSchema = new mongoose.Schema({
-  exam: {
+const AnswerQuizSchema = new mongoose.Schema({
+  quiz: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Exam', // reference to the Instructor model
+    ref: 'Quiz', // reference to the Instructor model
     required: true
   },
   student: {
@@ -30,4 +30,4 @@ const AnswerSchema = new mongoose.Schema({
 });
 
 
-export default mongoose.model('Answer', AnswerSchema);
+export default mongoose.model('AnswerQuiz', AnswerQuizSchema);

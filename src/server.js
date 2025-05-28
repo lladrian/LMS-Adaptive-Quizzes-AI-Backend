@@ -10,7 +10,8 @@ import studentRoutes from "./routes/student_routes.js";
 import classroomRoutes from "./routes/classroom_routes.js";
 import aiRoutes from "./routes/ai_routes.js";
 import examRoutes from "./routes/exam_routes.js";
-import answerRoutes from "./routes/answer_routes.js";
+import answerExamRoutes from "./routes/answer_exam_routes.js";
+import answerQuizRoutes from "./routes/answer_quiz_routes.js";
 import compilerRoutes from "./routes/compiler_routes.js";
 import languageRoutes from "./routes/language_routes.js";
 import practiceExamRoutes from "./routes/practice_exam_routes.js";
@@ -37,16 +38,14 @@ app.use("/students", studentRoutes);
 app.use("/classrooms", classroomRoutes);
 app.use("/ai", aiRoutes);
 app.use("/exams", examRoutes);
-app.use("/answers", answerRoutes);
+app.use("/answer_exams", answerExamRoutes);
+app.use("/answer_quizzes", answerQuizRoutes);
 app.use("/compilers", compilerRoutes);
 app.use("/languages", languageRoutes);
 app.use("/practice_exams", practiceExamRoutes);
 app.use("/materials", materialRoutes);
 app.use("/logins", loginRoutes);
 app.use("/quizzes", quizRoutes);
-
-
-
 
 
 
