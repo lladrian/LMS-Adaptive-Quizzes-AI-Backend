@@ -17,17 +17,20 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 }
 
 export const create_quiz = asyncHandler(async (req, res) => {
-    const { classroom_id, instruction, time_limit } = req.body;
+    const { classroom_id, instruction, time_limit, title, description, points } = req.body;
     
     try {
         // Check if all required fields are provided
-        if (!classroom_id || !instruction || !time_limit) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, instruction, time_limit)." });
+        if (!classroom_id || !instruction || !time_limit || !title || !description || !points) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, instruction, time_limit, title, description, points)." });
         }
    
         const newQuiz = new Quiz({
             classroom: classroom_id,
             instruction: instruction,
+            title: title,
+            description: description,
+            points: points,
             submission_time: time_limit,
             created_at: storeCurrentDate(0, 'hours'),
         });
@@ -79,11 +82,11 @@ export const get_specific_quiz = asyncHandler(async (req, res) => {
 
 export const update_quiz = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { classroom_id, instruction, time_limit } = req.body;
+    const { classroom_id, instruction, time_limit, title, description, points } = req.body;
 
     try {
-        if (!classroom_id || !instruction) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, instruction)." });
+        if (!classroom_id || !instruction || !title || !description || !points) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, instruction, title, description, points)." });
         }
 
         const updatedQuiz = await Quiz.findById(id);
@@ -94,6 +97,9 @@ export const update_quiz = asyncHandler(async (req, res) => {
         
         updatedQuiz.classroom = classroom_id ? classroom_id : updatedQuiz.classroom;
         updatedQuiz.instruction = instruction ? instruction : updatedQuiz.instruction;
+        updatedQuiz.title = title ? title : updatedQuiz.title;
+        updatedQuiz.description = description ? description : updatedQuiz.description;
+        updatedQuiz.points = points ? points : updatedQuiz.points;
         updatedQuiz.submission_time = time_limit ? time_limit : updatedQuiz.submission_time;
                 
         await updatedQuiz.save();
