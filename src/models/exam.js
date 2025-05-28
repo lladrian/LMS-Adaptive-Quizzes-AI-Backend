@@ -19,6 +19,10 @@ const ExamSchema = new mongoose.Schema({
     type: Number, 
     required: true
   },
+  type: {
+    type: String,
+    default: "exam"
+  },
   submission_time: { 
     type: Number, 
     required: true

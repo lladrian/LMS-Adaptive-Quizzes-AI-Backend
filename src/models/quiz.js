@@ -19,6 +19,10 @@ const QuizSchema = new mongoose.Schema({
     type: Number, 
     required: true
   },
+  type: {
+    type: String,
+    default: "quiz"
+  },
   submission_time: { 
     type: Number, 
     required: true
