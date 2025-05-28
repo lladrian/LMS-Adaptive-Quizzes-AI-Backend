@@ -59,7 +59,7 @@ export const get_all_answer_specific_quiz = asyncHandler(async (req, res) => {
         }
 
         const answers = await AnswerQuiz.find({ 
-            exam: quiz.id 
+            quiz: quiz.id 
         });
 
         return res.status(200).json({ data: answers });
