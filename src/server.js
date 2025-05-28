@@ -20,8 +20,12 @@ import loginRoutes from "./routes/login_routes.js";
 import quizRoutes from "./routes/quiz_routes.js";
 
 
+import path from 'path'; // Import the path module
+import fs from 'fs'; // Import fs to check if the directory exists
+import { fileURLToPath } from 'url'; // Import fileURLToPath
+import { dirname, join } from 'path'; // Import dirname
 
-
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 
 dotenv.config();
@@ -31,6 +35,8 @@ const port = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 
 app.use("/admins", adminRoutes);
 app.use("/instructors", instructorRoutes);
