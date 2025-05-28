@@ -61,18 +61,20 @@ export const extract_material = asyncHandler(async (req, res) => {
 });
 
 export const create_material = asyncHandler(async (req, res) => {
-    const { classroom_id } = req.body;
+    const { classroom_id, description, title } = req.body;
     const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
     const filename_insert = `materials/${filename}`; 
     
     try {
         // Check if all required fields are provided
-        if (!classroom_id) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id)." });
+        if (!classroom_id || !description || !title) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, description, title)." });
         }
    
         const newMaterial = new Material({
             classroom: classroom_id,
+            title: title,
+            description: description,
             material: req.file ? filename_insert : null,
             created_at: storeCurrentDate(0, 'hours'),
         });
@@ -123,18 +125,20 @@ export const get_specific_material = asyncHandler(async (req, res) => {
 
 export const update_material = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { classroom_id } = req.body;
+    const { classroom_id, description, title } = req.body;
     const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
     const filename_insert = `materials/${filename}`; 
 
     try {
-        if (!classroom_id) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id)." });
+        if (!classroom_id || !description || !title) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, description, title)." });
         }
 
         const updatedMaterial = await Material.findById(id);
 
         updatedMaterial.classroom = classroom_id ? classroom_id : updatedMaterial.classroom;
+        updatedMaterial.description = description ? description : updatedMaterial.description;
+        updatedMaterial.title = title ? title : updatedMaterial.title;
         updatedMaterial.material = req.file ? filename_insert : updatedMaterial.material;
         
         if(req.file) {

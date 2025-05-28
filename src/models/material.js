@@ -10,6 +10,14 @@ const MaterialSchema = new mongoose.Schema({
     type: String, 
     required: true
   },
+  description: { 
+    type: String, 
+    required: true
+  },
+  title: { 
+    type: String, 
+    required: true
+  },
   created_at: {
     type: String,
     default: null
