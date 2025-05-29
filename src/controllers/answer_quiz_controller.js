@@ -3,6 +3,7 @@ import moment from 'moment-timezone';
 import dotenv from 'dotenv';
 import AnswerQuiz from '../models/answer_quiz.js';
 import Quiz from '../models/quiz.js';
+import Classroom from '../models/classroom.js';
 
 function storeCurrentDate(expirationAmount, expirationUnit) {
     // Get the current date and time in Asia/Manila timezone
@@ -17,23 +18,23 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
     return formattedExpirationDateTime;
 }
 
-export const take_quiz  = asyncHandler(async (req, res) => {
+export const take_quiz = asyncHandler(async (req, res) => {
     const { quiz_id, student_id } = req.params; // Get the meal ID from the request parameters    
 
     try {
         const existingAnswer = await AnswerQuiz.findOne({
-            exam: quiz_id,
+            quiz: quiz_id,
             student: student_id
         });
 
         if (existingAnswer) {
             return res.status(400).json({ message: 'You have already started this quiz.' });
         }
-
+      
+   
         const newAnswer = new AnswerQuiz({
-            exam: quiz_id,
+            quiz: quiz_id,
             student: student_id,
-            line_of_code: "",
             opened_at: storeCurrentDate(0, 'hours'),
             created_at: storeCurrentDate(0, 'hours'),
         });
@@ -45,6 +46,35 @@ export const take_quiz  = asyncHandler(async (req, res) => {
         return res.status(500).json({ error: 'Failed to create quiz.' });
     }
 });
+
+
+export const get_all_answer_specific_student_specific_classroom = asyncHandler(async (req, res) => {  
+    const { classroom_id, student_id } = req.params; // Get the meal ID from the request parameters
+  
+    try {
+        const classroom = await Classroom.findById(classroom_id);
+
+        if (!classroom) {
+            return res.status(404).json({ message: 'Classroom not found.' });
+        }
+
+        const all_answers  = await AnswerQuiz
+        .find({ student: student_id }) // filter by student ID
+        .populate({
+            path: 'quiz',
+            populate: { path: 'classroom' }
+        });
+
+        const answers = all_answers.filter(answer => 
+            answer.quiz?.classroom?._id.toString() === classroom.id.toString()
+        );
+
+        return res.status(200).json({ data: answers });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all answers.' });
+    }
+});
+
 
 
 
@@ -88,16 +118,20 @@ export const get_specific_answer = asyncHandler(async (req, res) => {
 
 
 export const create_answer = asyncHandler(async (req, res) => {
-    const { line_of_code } = req.body;
+    const { array_answers } = req.body;
     const { quiz_id, student_id } = req.params; // Get the meal ID from the request parameters
     const now = moment.tz('Asia/Manila');
 
     try {
-        if (!line_of_code) {
-            return res.status(400).json({ message: "Please provide all fields (line_of_code)." });
+        if (!array_answers) {
+            return res.status(400).json({ message: "Please provide all fields (array_answers)." });
         }
    
         const quiz = await Quiz.findById(quiz_id);
+
+        if (!quiz) {
+            return res.status(404).json({ message: 'Quiz not found.' });
+        }
        
         const answer = await AnswerQuiz.findOne({
             quiz: quiz.id,
@@ -105,19 +139,18 @@ export const create_answer = asyncHandler(async (req, res) => {
         });
 
         if (answer) {
-            const opened_exam = moment.tz(answer.opened_at, "YYYY-MM-DD HH:mm:ss", 'Asia/Manila');
-            const diffMinutes = now.diff(opened_exam, 'minutes');
-
-            //if (diffMinutes >= quiz.submission_time) {
-            if (diffMinutes >= 1) {
-                return res.status(400).json({ message: 'Sorry! You can no longer submit your exam. The time is up.' });
+            const opened_quiz = moment.tz(answer.opened_at, "YYYY-MM-DD HH:mm:ss", 'Asia/Manila');
+            const diffMinutes = now.diff(opened_quiz, 'minutes');
+           
+            if (diffMinutes >= quiz.submission_time) {
+                return res.status(400).json({ message: 'Sorry! You can no longer submit your quiz. The time is up.' });
             }
         } else {
-            return res.status(400).json({ message: 'Not yet taking the exam.' });
+            return res.status(400).json({ message: 'Not yet taking the quiz.' });
         }
     
-  
-        answer.line_of_code = line_of_code;
+
+        answer.answers = array_answers;
         answer.submitted_at = storeCurrentDate(0, 'hours');
 
         await answer.save();

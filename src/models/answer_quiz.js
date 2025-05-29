@@ -1,5 +1,17 @@
 import mongoose from "mongoose";
 
+const AnswerSchema = new mongoose.Schema({
+  questionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  },
+  line_of_code: {
+    type: String,
+    required: false
+  }
+});
+
+
 const AnswerQuizSchema = new mongoose.Schema({
   quiz: {
     type: mongoose.Schema.Types.ObjectId,
@@ -11,9 +23,9 @@ const AnswerQuizSchema = new mongoose.Schema({
     ref: 'Student', // reference to the Instructor model
     required: true
   },
-  line_of_code: { 
-    type: String, 
-    required: false
+  answers: {
+    type: [AnswerSchema],
+    default: [] // ✅ default to empty array
   },
   points: { 
     type: Number, 

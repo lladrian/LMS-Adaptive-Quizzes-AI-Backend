@@ -17,11 +17,11 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 }
 
 export const create_exam = asyncHandler(async (req, res) => {
-    const { classroom_id, question, time_limit, title, description, points } = req.body;
+    const { classroom_id, question, time_limit, title, description } = req.body;
     
     try {
         // Check if all required fields are provided
-        if (!classroom_id || !question || !time_limit || !title || !description || !points) {
+        if (!classroom_id || !question || !time_limit || !title || !description) {
             return res.status(400).json({ message: "Please provide all fields (classroom_id, question, time_limit, title, description, points)." });
         }
    
@@ -30,7 +30,6 @@ export const create_exam = asyncHandler(async (req, res) => {
             question: question,
             title: title,
             description: description,
-            points: points,
             submission_time: time_limit,
             created_at: storeCurrentDate(0, 'hours'),
         });
@@ -82,11 +81,11 @@ export const get_specific_exam = asyncHandler(async (req, res) => {
 
 export const update_exam = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { classroom_id, question, time_limit, title, description, points} = req.body;
+    const { classroom_id, question, time_limit, title, description} = req.body;
 
     try {
-        if (!classroom_id || !question || !title || !description || !points) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, question, title, description, points)." });
+        if (!classroom_id || !question || !title || !description) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, question, title, description)." });
         }
 
         const updatedExam = await Exam.findById(id);
@@ -99,7 +98,6 @@ export const update_exam = asyncHandler(async (req, res) => {
         updatedExam.question = question ? question : updatedExam.question;
         updatedExam.title = title ? title : updatedExam.title;
         updatedExam.description = description ? description : updatedExam.description;
-        updatedExam.points = points ? points : updatedExam.points;
         updatedExam.submission_time = time_limit ? time_limit : updatedExam.submission_time;
                 
         await updatedExam.save();

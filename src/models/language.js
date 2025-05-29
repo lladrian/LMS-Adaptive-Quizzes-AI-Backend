@@ -1,6 +1,14 @@
 import mongoose from "mongoose";
 
 const LanguageSchema = new mongoose.Schema({
+  name: {
+    type: String, 
+    required: true
+  },
+  starting_code: {
+    type: String, 
+    required: true
+  },
   language: {
     type: String, 
     required: true
