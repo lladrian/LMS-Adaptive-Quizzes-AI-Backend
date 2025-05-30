@@ -3,14 +3,17 @@ import mongoose from "mongoose";
 const AnswerSchema = new mongoose.Schema({
   questionId: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: 'Quiz', // ✅ now it's referring to real documents
+    required: true
   },
   line_of_code: {
     type: String,
     required: false
   },
   points: {
+    type: Number,
+    default: 0
+  },
+  is_correct: {
     type: Number,
     default: 0
   }

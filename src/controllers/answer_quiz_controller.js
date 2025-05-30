@@ -88,8 +88,7 @@ export const get_all_answer_specific_quiz = asyncHandler(async (req, res) => {
             return res.status(404).json({ message: 'Quiz not found.' });
         }
 
-        const answers = await AnswerQuiz.find({ quiz: quiz.id })
-        .populate('student');
+        const answers = await AnswerQuiz.find({ quiz: quiz.id }).populate('student');
 
         return res.status(200).json({ data: answers });
     } catch (error) {

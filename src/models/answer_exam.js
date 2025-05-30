@@ -12,6 +12,10 @@ const AnswerSchema = new mongoose.Schema({
   points: {
     type: Number,
     default: 0
+  },
+  is_correct: {
+    type: Number,
+    default: 0
   }
 });
 
