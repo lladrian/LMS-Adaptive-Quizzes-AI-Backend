@@ -3,6 +3,7 @@ import * as QuizController from '../controllers/quiz_controller.js'; // Import t
 
 const quizRoutes = Router();
 
+quizRoutes.get('/get_specific_quiz_specific_answer/:quiz_id/:student_id', QuizController.get_specific_quiz_specific_answer);
 quizRoutes.get('/get_all_quiz_specific_classroom/:classroom_id', QuizController.get_all_quiz_specific_classroom);
 quizRoutes.get('/get_specific_quiz/:quiz_id', QuizController.get_specific_quiz);
 quizRoutes.post('/add_quiz', QuizController.create_quiz);

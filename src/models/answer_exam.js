@@ -8,6 +8,10 @@ const AnswerSchema = new mongoose.Schema({
   line_of_code: {
     type: String,
     required: false
+  },
+  points: {
+    type: Number,
+    default: 0
   }
 });
 
@@ -25,10 +29,6 @@ const AnswerExamSchema = new mongoose.Schema({
   answers: {
     type: [AnswerSchema],
     default: [] // ✅ default to empty array
-  },
-  points: { 
-    type: Number, 
-    default: 0
   },
   opened_at: {
     type: String,

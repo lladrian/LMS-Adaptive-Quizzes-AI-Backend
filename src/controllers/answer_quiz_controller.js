@@ -57,7 +57,7 @@ export const get_all_answer_specific_student_specific_classroom = asyncHandler(a
         if (!classroom) {
             return res.status(404).json({ message: 'Classroom not found.' });
         }
-
+        
         const all_answers  = await AnswerQuiz
         .find({ student: student_id }) // filter by student ID
         .populate({
@@ -88,9 +88,8 @@ export const get_all_answer_specific_quiz = asyncHandler(async (req, res) => {
             return res.status(404).json({ message: 'Quiz not found.' });
         }
 
-        const answers = await AnswerQuiz.find({ 
-            quiz: quiz.id 
-        });
+        const answers = await AnswerQuiz.find({ quiz: quiz.id })
+        .populate('student');
 
         return res.status(200).json({ data: answers });
     } catch (error) {

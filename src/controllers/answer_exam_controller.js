@@ -85,9 +85,7 @@ export const get_all_answer_specific_exam = asyncHandler(async (req, res) => {
             return res.status(404).json({ message: 'Exam not found.' });
         }
 
-        const answers = await AnswerExam.find({ 
-            exam: exam.id 
-        });
+        const answers = await AnswerExam.find({ exam: exam.id }).populate('student');
 
         return res.status(200).json({ data: answers });
     } catch (error) {

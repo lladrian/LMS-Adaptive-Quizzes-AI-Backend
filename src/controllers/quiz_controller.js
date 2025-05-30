@@ -2,6 +2,8 @@ import asyncHandler from 'express-async-handler';
 import moment from 'moment-timezone';
 import dotenv from 'dotenv';
 import Quiz from '../models/quiz.js';
+import AnswerQuiz from '../models/answer_quiz.js';
+
 
 function storeCurrentDate(expirationAmount, expirationUnit) {
     // Get the current date and time in Asia/Manila timezone
@@ -59,6 +61,29 @@ export const get_all_quiz_specific_classroom = asyncHandler(async (req, res) => 
         return res.status(200).json({ data: quizzes });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all quizzes in specific classroom.' });
+    }
+});
+
+export const get_specific_quiz_specific_answer = asyncHandler(async (req, res) => {  
+    const { quiz_id, student_id } = req.params; // Get the meal ID from the request parameters
+  
+    try {
+        const quiz = await Quiz.findById(quiz_id).populate('classroom');
+
+        if (!quiz) {
+            return res.status(404).json({ message: 'Quiz not found.' });
+        }
+
+        const answer  = await AnswerQuiz
+        .findOne({ student: student_id, quiz: quiz.id}) 
+        .populate({
+            path: 'quiz',
+            populate: { path: 'classroom' }
+        });
+
+        return res.status(200).json({ data: answer });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get specific quiz.' });
     }
 });
 
