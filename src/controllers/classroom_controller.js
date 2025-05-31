@@ -165,24 +165,40 @@ export const get_all_classroom_overview_specific_instructor = asyncHandler(async
   
     try {
         const instructor = await Instructor.findById(instructor_id);
-        const classroom = await Classroom.findById(classroom_id);
+       // const classroom = await Classroom.findById(classroom_id);
 
         if (!instructor) return res.status(404).json({ message: 'Instructor not found.' });
-        if (!classroom) return res.status(404).json({ message: 'Classroom not found.' });
+       // if (!classroom) return res.status(404).json({ message: 'Classroom not found.' });
 
         const classrooms = await Classroom.find({ 
             instructor: instructor.id
         });
 
-        const materials = await Material.find({ 
-            classroom : classroom.id,
-        });
+        const results = await Promise.all(classrooms.map(async (classroom) => {
+            const materials = await Material.find({ 
+                classroom: classroom.id 
+            });
+            const students = await Student.find({ 
+                joined_classroom: classroom.id 
+            });
+            return {
+                classroom,
+                materials,
+                students
+            };
+        }));
 
-        const students = await Student.find({ 
-            joined_classroom: classroom.id 
-        });
+        // const materials = await Material.find({ 
+        //     classroom : classroom.id,
+        // });
 
-        return res.status(200).json({ data: {classrooms, students, materials} });
+        // const students = await Student.find({ 
+        //     joined_classroom: classroom.id 
+        // });
+
+        return res.status(200).json({ data: results });
+
+       //return res.status(200).json({ data: {classrooms, students, materials} });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all classrooms.' });
     }
