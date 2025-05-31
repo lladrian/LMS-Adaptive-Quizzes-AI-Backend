@@ -294,13 +294,18 @@ export const get_all_classroom_specific_instructor = asyncHandler(async (req, re
 
         if (!instructor) return res.status(404).json({ message: 'Instructor not found.' });
 
-        const classrooms = await Classroom.find({ 
+        const unhide_classrooms = await Classroom.find({ 
             instructor: instructor.id,
             is_hidden: 0
         }).populate('instructor');
 
+        const hidden_classrooms = await Classroom.find({ 
+            instructor: instructor.id,
+            is_hidden: 1
+        }).populate('instructor');
 
-        return res.status(200).json({ data: classrooms });
+
+        return res.status(200).json({ data: {unhide_classrooms, hidden_classrooms} });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all classrooms.' });
     }
