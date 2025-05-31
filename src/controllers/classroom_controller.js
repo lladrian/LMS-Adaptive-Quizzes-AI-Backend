@@ -160,6 +160,34 @@ export const student_leave_classroom = asyncHandler(async (req, res) => {
     }
 });
 
+export const get_all_classroom_overview_specific_instructor = asyncHandler(async (req, res) => {  
+    const { instructor_id , classroom_id } = req.params; // Get the meal ID from the request parameters
+  
+    try {
+        const instructor = await Instructor.findById(instructor_id);
+        const classroom = await Classroom.findById(classroom_id);
+
+        if (!instructor) return res.status(404).json({ message: 'Instructor not found.' });
+        if (!classroom) return res.status(404).json({ message: 'Classroom not found.' });
+
+        const classrooms = await Classroom.find({ 
+            instructor: instructor.id
+        });
+
+        const materials = await Material.find({ 
+            classroom : classroom.id,
+        });
+
+        const students = await Student.find({ 
+            joined_classroom: classroom.id 
+        });
+
+        return res.status(200).json({ data: {classrooms, students, materials} });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all classrooms.' });
+    }
+});
+
 export const get_all_classroom_student = asyncHandler(async (req, res) => {  
     const { classroom_id } = req.params; // Get the meal ID from the request parameters
   
@@ -227,12 +255,14 @@ export const get_all_classroom_specific_student = asyncHandler(async (req, res) 
   
     try {
         const student = await Student.findById(student_id);
+
+        if (!student) return res.status(404).json({ message: 'Student not found.' });
+
         const classrooms = await Classroom.find({
             _id: { $in: student.joined_classroom },
             is_hidden: 0
         }).populate('instructor');
 
-        if (!student) return res.status(404).json({ message: 'Student not found.' });
 
         return res.status(200).json({ data: classrooms });
     } catch (error) {
@@ -246,12 +276,13 @@ export const get_all_classroom_specific_instructor = asyncHandler(async (req, re
     try {
         const instructor = await Instructor.findById(instructor_id);
 
+        if (!instructor) return res.status(404).json({ message: 'Instructor not found.' });
+
         const classrooms = await Classroom.find({ 
             instructor: instructor.id,
             is_hidden: 0
         }).populate('instructor');
 
-        if (!instructor) return res.status(404).json({ message: 'Instructor not found.' });
 
         return res.status(200).json({ data: classrooms });
     } catch (error) {
