@@ -275,9 +275,13 @@ export const get_all_classroom_specific_student = asyncHandler(async (req, res) 
         if (!student) return res.status(404).json({ message: 'Student not found.' });
 
         const classrooms = await Classroom.find({
-            _id: { $in: student.joined_classroom },
-            is_hidden: 0
+            _id: { $in: student.joined_classroom }
         }).populate('instructor');
+
+    // const classrooms = await Classroom.find({
+    //         _id: { $in: student.joined_classroom },
+    //         is_hidden: 0
+    //     }).populate('instructor');
 
 
         return res.status(200).json({ data: classrooms });
