@@ -14,6 +14,10 @@ const AdminSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  status: {
+    type: String,
+    default: "verified"
+  },
   role: {
     type: String,
     default: "admin"

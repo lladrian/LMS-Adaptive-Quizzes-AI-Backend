@@ -26,17 +26,18 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 
 
 export const create_classroom = asyncHandler(async (req, res) => {
-    const { classroom_name, subject_code, instructor, classroom_code, description } = req.body;
+    const { classroom_name, subject_code, instructor, classroom_code, description, programming_language } = req.body;
     
     try {
         // Check if all required fields are provided
-        if (!classroom_name || !subject_code || !instructor || !classroom_code) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_name, subject_code, instructor, classroom_code, description)." });
+        if (!classroom_name || !subject_code || !instructor || !classroom_code || !programming_language) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_name, subject_code, instructor, classroom_code, description, programming_language)." });
         }
    
         const newClassroom = new Classroom({
             classroom_name: classroom_name,
             subject_code: subject_code,
+            programming_language: programming_language,
             instructor: instructor,
             classroom_code: classroom_code,
             description: description,
@@ -53,11 +54,11 @@ export const create_classroom = asyncHandler(async (req, res) => {
 
 
 export const add_student_classroom = asyncHandler(async (req, res) => {
-    const { classroom_id, student_id } = req.params; // Get the meal ID from the request parameters
+    const { classroom_id, student_id_number } = req.params; // Get the meal ID from the request parameters
     
     try {
         const classroom = await Classroom.findById(classroom_id);
-        const student = await Student.findById(student_id);
+        const student = await Student.findOne({ student_id_number });
 
         if (!classroom) return res.status(400).json({ message: 'Classroom not found' });
         if (!student) return res.status(404).json({ message: 'Student not found.' });
@@ -317,11 +318,11 @@ export const get_all_classroom_specific_instructor = asyncHandler(async (req, re
 
 export const update_classroom = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { classroom_name, subject_code, description } = req.body;
+    const { classroom_name, subject_code, description, programming_language } = req.body;
 
     try {
-        if (!classroom_name || !subject_code || !description) {
-            return res.status(400).json({ message: "All fields are required: classroom_name, description and subject_code." });
+        if (!classroom_name || !subject_code || !description || !programming_language) {
+            return res.status(400).json({ message: "All fields are required: classroom_name, description, programming_language and subject_code." });
         }
 
         const updatedClassroom = await Classroom.findById(id);
@@ -333,7 +334,8 @@ export const update_classroom = asyncHandler(async (req, res) => {
         updatedClassroom.description = description ? description : updatedClassroom.description;
         updatedClassroom.classroom_name = classroom_name ? classroom_name : updatedClassroom.classroom_name;
         updatedClassroom.subject_code = subject_code ? subject_code : updatedClassroom.subject_code;
-                        
+        updatedClassroom.programming_language = programming_language ? programming_language : updatedClassroom.programming_language;
+      
         await updatedClassroom.save();
 
         return res.status(200).json({ data: 'Classroom successfully updated.' });

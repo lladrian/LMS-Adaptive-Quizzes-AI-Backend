@@ -28,12 +28,12 @@ function hashConverterMD5(password) {
 
 
 export const create_student = asyncHandler(async (req, res) => {
-    const { fullname, password, email } = req.body;
+    const { fullname, password, email, student_id_number } = req.body;
     
     try {
         // Check if all required fields are provided
-        if (!fullname || !email || !password) {
-            return res.status(400).json({ message: "Please provide all fields (email, password, fullname)." });
+        if (!fullname || !email || !password || !student_id_number) {
+            return res.status(400).json({ message: "Please provide all fields (email, password, fullname, student_id_number)." });
         }
 
 
@@ -48,6 +48,7 @@ export const create_student = asyncHandler(async (req, res) => {
             fullname: fullname,
             password: hash_password,
             email: email,
+            student_id_number: student_id_number,
             created_at: storeCurrentDate(0, 'hours'),
         });
 
@@ -62,7 +63,8 @@ export const create_student = asyncHandler(async (req, res) => {
 
 export const get_all_student = asyncHandler(async (req, res) => {    
     try {
-        const students = await Student.find();
+        const students = await Student.find({ role: 'student' });
+
 
         return res.status(200).json({ data: students });
     } catch (error) {
@@ -112,11 +114,11 @@ export const get_specific_student = asyncHandler(async (req, res) => {
 
 export const update_student = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { email, fullname } = req.body;
+    const { email, fullname, student_id_number } = req.body;
 
     try {
-        if (!email || !fullname) {
-            return res.status(400).json({ message: "All fields are required: email and fullname." });
+        if (!email || !fullname || !student_id_number) {
+            return res.status(400).json({ message: "All fields are required: email, student_id_number and fullname." });
         }
 
         const updatedStudent = await Student.findById(id);
@@ -127,6 +129,7 @@ export const update_student = asyncHandler(async (req, res) => {
                         
         updatedStudent.email = email ? email : updatedStudent.email;
         updatedStudent.fullname = fullname ? fullname : updatedStudent.fullname;
+        updatedStudent.student_id_number = student_id_number ? student_id_number : updatedStudent.student_id_number;
                                 
         await updatedStudent.save();
 

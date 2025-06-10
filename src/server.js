@@ -18,6 +18,10 @@ import practiceExamRoutes from "./routes/practice_exam_routes.js";
 import materialRoutes from "./routes/material_routes.js";
 import loginRoutes from "./routes/login_routes.js";
 import quizRoutes from "./routes/quiz_routes.js";
+import otp_routes from "./routes/otp_routes.js";
+import promoteRoutes from "./routes/promote_routes.js";
+
+
 
 
 import path from 'path'; // Import the path module
@@ -57,6 +61,10 @@ app.use("/practice_exams", practiceExamRoutes);
 app.use("/materials", materialRoutes);
 app.use("/logins", loginRoutes);
 app.use("/quizzes", quizRoutes);
+app.use("/otp", otp_routes);
+app.use("/promotes", promoteRoutes);
+
+
 
 
 

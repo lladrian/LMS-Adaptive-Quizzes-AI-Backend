@@ -63,9 +63,14 @@ export const create_instructor = asyncHandler(async (req, res) => {
 
 export const get_all_instructor = asyncHandler(async (req, res) => {    
     try {
-        const instructors = await Instructor.find();
+        const instructors = await Instructor.find({ role: 'instructor' });
+        const admin_instructors = await Admin.find({ role: 'instructor' });
+        const student_instructors = await Student.find({ role: 'instructor' });
 
-        return res.status(200).json({ data: instructors });
+        // Merge both results
+        const mergedInstructors = [...instructors, ...admin_instructors, ...student_instructors];
+        
+        return res.status(200).json({ data: mergedInstructors });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all instructors.' });
     }
@@ -121,16 +126,35 @@ export const update_instructor = asyncHandler(async (req, res) => {
         }
 
         const updatedInstructor = await Instructor.findById(id);
-                   
-        if (!updatedInstructor) {
-            return res.status(404).json({ message: "Instructor not found" });
-        }
-                
-        updatedInstructor.email = email ? email : updatedInstructor.email;
-        updatedInstructor.fullname = fullname ? fullname : updatedInstructor.fullname;
-                        
-        await updatedInstructor.save();
+        const updatedAdminInstructor = await Admin.findById(id);
+        const updatedStudentInstructor = await Student.findById(id);
 
+                   
+        if (!updatedInstructor && !updatedAdminInstructor && !updatedStudentInstructor) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if(updatedInstructor) {
+            updatedInstructor.email = email ? email : updatedInstructor.email;
+            updatedInstructor.fullname = fullname ? fullname : updatedInstructor.fullname;
+                            
+            await updatedInstructor.save();
+        }
+
+        if(updatedAdminInstructor) {
+            updatedAdminInstructor.email = email ? email : updatedAdminInstructor.email;
+            updatedAdminInstructor.fullname = fullname ? fullname : updatedAdminInstructor.fullname;
+                            
+            await updatedAdminInstructor.save();
+        }
+
+        if(updatedStudentInstructor) {
+            updatedStudentInstructor.email = email ? email : updatedStudentInstructor.email;
+            updatedStudentInstructor.fullname = fullname ? fullname : updatedStudentInstructor.fullname;
+                            
+            await updatedStudentInstructor.save();
+        }
+  
         return res.status(200).json({ data: 'Instructor account successfully updated.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to update instructor account.' });

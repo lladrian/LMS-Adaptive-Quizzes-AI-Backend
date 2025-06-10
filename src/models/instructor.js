@@ -14,6 +14,10 @@ const InstructorSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  status: {
+    type: String,
+    default: "unverified"
+  },
   role: {
     type: String,
     default: "instructor"

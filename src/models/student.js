@@ -5,6 +5,10 @@ const StudentSchema = new mongoose.Schema({
     type: String,
     required: true
   }, 
+  student_id_number: {
+    type: String,
+    required: false,
+  }, 
   password: { 
     type: String, 
     required: true,
@@ -17,6 +21,10 @@ const StudentSchema = new mongoose.Schema({
   role: {
     type: String,
     default: "student"
+  },
+  status: {
+    type: String,
+    default: "unverified"
   },
   joined_classroom: [{
     type: mongoose.Schema.Types.ObjectId,

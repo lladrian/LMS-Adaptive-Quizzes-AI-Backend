@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+
 const ClassroomSchema = new mongoose.Schema({
   classroom_name: {
     type: String,
@@ -10,6 +11,10 @@ const ClassroomSchema = new mongoose.Schema({
     required: true
   }, 
   description: {
+    type: String,
+    required: true
+  }, 
+  programming_language: {
     type: String,
     required: true
   }, 

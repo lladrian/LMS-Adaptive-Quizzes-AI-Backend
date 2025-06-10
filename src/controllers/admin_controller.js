@@ -6,7 +6,6 @@ import Student from '../models/student.js';
 import Admin from '../models/admin.js';
 import Instructor from '../models/instructor.js';
 
-
 function storeCurrentDate(expirationAmount, expirationUnit) {
     // Get the current date and time in Asia/Manila timezone
     const currentDateTime = moment.tz("Asia/Manila");
@@ -61,9 +60,13 @@ export const create_admin = asyncHandler(async (req, res) => {
 
 export const get_all_admin = asyncHandler(async (req, res) => {    
     try {
-        const admins = await Admin.find();
+        const instructor_admins = await Instructor.find({ role: 'admin' });
+        const admins = await Admin.find({ role: 'admin' });
+        
+        // Merge both results
+        const mergedAdmins = [...instructor_admins, ...admins];
 
-        return res.status(200).json({ data: admins });
+        return res.status(200).json({ data: mergedAdmins });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all admins.' });
     }
@@ -120,16 +123,27 @@ export const update_admin = asyncHandler(async (req, res) => {
         }
 
         const updatedAdmin = await Admin.findById(id);
+        const updatedInstructorAdmin = await Instructor.findById(id);
+
            
-        if (!updatedAdmin) {
-            return res.status(404).json({ message: "Admin not found" });
+        if (!updatedAdmin && !updatedInstructorAdmin) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if(updatedAdmin) {
+            updatedAdmin.email = email ? email : updatedAdmin.email;
+            updatedAdmin.fullname = fullname ? fullname : updatedAdmin.fullname;
+                    
+            await updatedAdmin.save();
+        }
+
+        if(updatedInstructorAdmin) {
+            updatedInstructorAdmin.email = email ? email : updatedInstructorAdmin.email;
+            updatedInstructorAdmin.fullname = fullname ? fullname : updatedInstructorAdmin.fullname;
+                    
+            await updatedInstructorAdmin.save();
         }
         
-        updatedAdmin.email = email ? email : updatedAdmin.email;
-        updatedAdmin.fullname = fullname ? fullname : updatedAdmin.fullname;
-                
-        await updatedAdmin.save();
-
         return res.status(200).json({ data: 'Admin account successfully updated.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to update admin account.' });
