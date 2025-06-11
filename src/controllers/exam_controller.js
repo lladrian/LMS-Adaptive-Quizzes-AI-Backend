@@ -17,11 +17,37 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
     return formattedExpirationDateTime;
 }
 
+export const create_exam_option = asyncHandler(async (req, res) => {
+    const { classroom_id, question_option, time_limit, title, description, grading_breakdown } = req.body;
+    
+    try {
+        if (!classroom_id || !question_option || !time_limit || !title || !description || !grading_breakdown) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, question_option, time_limit, title, description, points, grading_breakdown)." });
+        }
+   
+        const newExam = new Exam({
+            classroom: classroom_id,
+            question_option: question_option,
+            title: title,
+            grading_breakdown: grading_breakdown,
+            description: description,
+            submission_time: time_limit,
+            created_at: storeCurrentDate(0, 'hours'),
+        });
+
+        await newExam.save();
+
+        return res.status(200).json({ message: 'New exam successfully created.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to create exam.' });
+    }
+});
+
+
 export const create_exam = asyncHandler(async (req, res) => {
     const { classroom_id, question, time_limit, title, description, grading_breakdown } = req.body;
     
     try {
-        // Check if all required fields are provided
         if (!classroom_id || !question || !time_limit || !title || !description || !grading_breakdown) {
             return res.status(400).json({ message: "Please provide all fields (classroom_id, question, time_limit, title, description, points, grading_breakdown)." });
         }
@@ -101,6 +127,38 @@ export const get_specific_exam = asyncHandler(async (req, res) => {
         return res.status(200).json({ data: exam });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get specific exam.' });
+    }
+});
+
+
+
+export const update_exam_option = asyncHandler(async (req, res) => {    
+    const { id } = req.params; // Get the meal ID from the request parameters
+    const { classroom_id, question_option, time_limit, title, description, grading_breakdown} = req.body;
+
+    try {
+        if (!classroom_id || !question_option || !title || !description || !grading_breakdown) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, question_option, title, description, grading_breakdown)." });
+        }
+
+        const updatedExam = await Exam.findById(id);
+
+        if (!updatedExam) {
+            return res.status(404).json({ message: "Exam not found" });
+        }
+        
+        updatedExam.classroom = classroom_id ? classroom_id : updatedExam.classroom;
+        updatedExam.question_option = question_option ? question_option : updatedExam.question_option;
+        updatedExam.title = title ? title : updatedExam.title;
+        updatedExam.description = description ? description : updatedExam.description;
+        updatedExam.submission_time = time_limit ? time_limit : updatedExam.submission_time;
+        updatedExam.grading_breakdown = grading_breakdown ? grading_breakdown : updatedExam.grading_breakdown;
+                
+        await updatedExam.save();
+
+        return res.status(200).json({ data: 'Exam successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update exam.' });
     }
 });
 

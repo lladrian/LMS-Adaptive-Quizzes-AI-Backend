@@ -6,6 +6,26 @@ const MaterialSchema = new mongoose.Schema({
     ref: 'Classroom', // reference to the Instructor model
     required: true
   },
+  question: [
+    {
+      text: {
+        type: String,
+        required: false
+      },
+      expected_output: {
+        type: String,
+        required: false
+      },
+      points: {
+        type: Number,
+        required: false
+      }
+    }
+  ],
+  grading_breakdown: {
+    type: String,
+    default: "activity"
+  },
   material: { 
     type: String, 
     required: true

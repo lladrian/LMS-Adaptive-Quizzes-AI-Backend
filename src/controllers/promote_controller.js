@@ -4,6 +4,33 @@ import Admin from '../models/admin.js';
 import Instructor from '../models/instructor.js';
 
 
+export const check_user = asyncHandler(async (req, res) => { 
+    const { id } = req.params; // Get the meal ID from the request parameters
+    try {
+        const admin = await Admin.findById(id);
+        const instructor = await Instructor.findById(id);
+        const student = await Student.findById(id);
+        let user_type = '';
+
+        if(!admin && !instructor && !student) {
+            return res.status(404).json({ message: "User not found." });
+        }  
+
+        if (admin) {
+            user_type = 'admin';
+        } else if (instructor) {
+            user_type = 'instructor';
+        } else if (student) {
+            user_type = 'student';
+        }
+
+
+        return res.status(200).json({ data: user_type });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update role.' });
+    }
+});
+
 export const promote_user = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
     const { role_name } = req.body;
