@@ -47,19 +47,21 @@ export const create_otp = asyncHandler(async (req, res) => {
         const instructor = await Instructor.findOne({ email: email });
         const admin = await Admin.findOne({ email: email });
 
+        
 
         if (!student && !instructor && !admin) {
             return res.status(404).json({ message: "User not found." });
         }
 
+        const otp_code = generateOTP();
+        const user_type = student?.role || instructor?.role || admin?.role;
+        const user_id = student?.id || instructor?.id || admin?.id;
+
         const otpRecord = await OTP.findOne({ 
-            user: student.id || instructor.id || admin.id
+            user: user_id
         });
 
-        const otp_code = generateOTP();
-        const user_type = student.role || instructor.role || admin.role;
-        const user_id = student.id || instructor.id || admin.id;
-
+     
         if(!otpRecord) {
             const newOTP = new OTP({
                 otp_code: otp_code,
@@ -98,14 +100,14 @@ export const otp_verification_email_verification = asyncHandler(async (req, res)
 
         const student = await Student.findOne({ email: email });
         const instructor = await Instructor.findOne({ email: email });
-        const admin = await Admin.findOne({ email: email });
+        //const admin = await Admin.findOne({ email: email });
 
-        if (!student && !instructor && !admin) {
+        if (!student && !instructor) {
             return res.status(404).json({ message: "User not found." });
         }
 
-        const user_type = student.role || instructor.role || admin.role;
-        const user_id = student.id || instructor.id || admin.id;
+        const user_type = student?.role || instructor?.role;
+        const user_id = student?.id || instructor?.id;
 
         const otpRecord = await OTP.findOne({ 
             user: user_id, 
