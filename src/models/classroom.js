@@ -48,7 +48,7 @@ const ClassroomSchema = new mongoose.Schema({
   },
   grading_system: {
     type: GradingSchema,
-    default: {}
+    default: () => ({}) 
   },
   is_hidden: {
     type: Number,

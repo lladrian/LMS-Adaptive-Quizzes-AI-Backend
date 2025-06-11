@@ -317,11 +317,11 @@ export const get_all_classroom_specific_instructor = asyncHandler(async (req, re
 
 export const update_classroom = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { classroom_name, subject_code, description, programming_language, quiz, midterm, final, activity } = req.body;
+    const { classroom_name, subject_code, description, programming_language, grading_system  } = req.body;
 
     try {
-        if (!classroom_name || !subject_code || !description || !programming_language || !quiz || !midterm || !final || !activity) {
-            return res.status(400).json({ message: "All fields are required: classroom_name, description, programming_language, quiz, midterm, final, activity and subject_code." });
+        if (!classroom_name || !subject_code || !description || !programming_language || !grading_system) {
+            return res.status(400).json({ message: "All fields are required: classroom_name, description, programming_language, grading_system and subject_code." });
         }
 
         const updatedClassroom = await Classroom.findById(id);
@@ -334,10 +334,7 @@ export const update_classroom = asyncHandler(async (req, res) => {
         updatedClassroom.classroom_name = classroom_name ? classroom_name : updatedClassroom.classroom_name;
         updatedClassroom.subject_code = subject_code ? subject_code : updatedClassroom.subject_code;
         updatedClassroom.programming_language = programming_language ? programming_language : updatedClassroom.programming_language;
-        updatedClassroom.quiz = quiz ? quiz : updatedClassroom.quiz;
-        updatedClassroom.midterm = midterm ? midterm : updatedClassroom.midterm;
-        updatedClassroom.final = final ? final : updatedClassroom.final;
-        updatedClassroom.activity = activity ? activity : updatedClassroom.activity;
+        updatedClassroom.grading_system = grading_system ? grading_system : updatedClassroom.grading_system;
 
         await updatedClassroom.save();
 

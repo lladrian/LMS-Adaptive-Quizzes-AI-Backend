@@ -94,7 +94,7 @@ export const get_all_answer_specific_exam = asyncHandler(async (req, res) => {
     }
 });
 
-export const get_all_missing_answer_specific_exam = asyncHandler(async (req, res) => {  
+export const get_all_student_missing_answer_specific_exam = asyncHandler(async (req, res) => {  
     const { exam_id } = req.params; // Get the meal ID from the request parameters
   
     try {
@@ -105,11 +105,15 @@ export const get_all_missing_answer_specific_exam = asyncHandler(async (req, res
         }
 
         const answers = await AnswerExam.find({ exam: exam.id, submitted_at: { $ne: null } }).populate('student');
-        const students = await Student.find({ role: 'student' });
+        const answeredStudentIds = answers.map(ans => ans.student._id);
+        const students = await Student.find({
+        role: 'student',
+        _id: { $nin: answeredStudentIds }
+        });
 
-        return res.status(200).json({ data: answers });
+        return res.status(200).json({ data: students });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to get all answers.' });
+        return res.status(500).json({ error: 'Failed to get all students have missing exam.' });
     }
 });
 

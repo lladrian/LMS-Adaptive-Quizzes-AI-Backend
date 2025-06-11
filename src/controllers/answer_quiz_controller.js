@@ -96,6 +96,29 @@ export const get_all_answer_specific_quiz = asyncHandler(async (req, res) => {
     }
 });
 
+export const get_all_student_missing_answer_specific_quiz = asyncHandler(async (req, res) => {  
+    const { quiz_id } = req.params; // Get the meal ID from the request parameters
+  
+    try {
+        const quiz = await Quiz.findById(quiz_id).populate('classroom');
+
+        if (!quiz) {
+            return res.status(404).json({ message: 'Quiz not found.' });
+        }
+
+        const answers = await AnswerQuiz.find({ quiz: quiz.id, submitted_at: { $ne: null } }).populate('student');
+        const answeredStudentIds = answers.map(ans => ans.student._id);
+        const students = await Student.find({
+        role: 'student',
+        _id: { $nin: answeredStudentIds }
+        });
+
+        return res.status(200).json({ data: students });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all students have missing quiz.' });
+    }
+});
+
 
 export const get_specific_answer = asyncHandler(async (req, res) => {  
     const { answer_id } = req.params; // Get the meal ID from the request parameters
