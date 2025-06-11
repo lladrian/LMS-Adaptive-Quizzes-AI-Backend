@@ -36,6 +36,7 @@ const ExamSchema = new mongoose.Schema({
   },
   grading_breakdown: {
     type: String,
+    enum: ['final', 'midterm'],
     required: true
   },
   submission_time: { 

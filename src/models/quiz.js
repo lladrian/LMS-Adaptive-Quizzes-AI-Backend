@@ -35,7 +35,8 @@ const QuizSchema = new mongoose.Schema({
     type: String,
     default: "quiz"
   },
-    grading_breakdown: {
+  grading_breakdown: {
+    type: String,
     default: "quiz"
   },
   submission_time: { 
