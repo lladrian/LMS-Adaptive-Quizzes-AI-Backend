@@ -58,11 +58,12 @@ export const create_otp = asyncHandler(async (req, res) => {
 
         const otp_code = generateOTP();
         const user_type = student.role || instructor.role || admin.role;
+        const user_id = student.id || instructor.id || admin.id;
 
         if(!otpRecord) {
             const newOTP = new OTP({
                 otp_code: otp_code,
-                user: student.id || instructor.id || admin.id,
+                user: user_id,
                 user_type: user_type.charAt(0).toUpperCase() + user_type.slice(1).toLowerCase(),
                 created_at: storeCurrentDate(0, 'hours')
             });
@@ -73,7 +74,7 @@ export const create_otp = asyncHandler(async (req, res) => {
             return res.status(200).json({ data: 'New otp code successfully created.' });
         } else {
             otpRecord.otp_code = otp_code ? otp_code : otpRecord.otp_code;
-            otpRecord.user = student.id || instructor.id || admin.id || otpRecord.user;
+            otpRecord.user = user_id ? user_id : otpRecord.user;
             otpRecord.user_type = user_type ? user_type.charAt(0).toUpperCase() + user_type.slice(1).toLowerCase() : otpRecord.user_type;
             otpRecord.created_at = storeCurrentDate(0, 'hours') ? storeCurrentDate(0, 'hours') : otpRecord.created_at;
 
@@ -104,9 +105,10 @@ export const otp_verification_email_verification = asyncHandler(async (req, res)
         }
 
         const user_type = student.role || instructor.role || admin.role;
+        const user_id = student.id || instructor.id || admin.id;
 
         const otpRecord = await OTP.findOne({ 
-            user: student.id || instructor.id || admin.id, 
+            user: user_id, 
             user_type: user_type.charAt(0).toUpperCase() + user_type.slice(1).toLowerCase(), 
             otp_code: otp_code 
         });
@@ -167,9 +169,10 @@ export const otp_verification_password = asyncHandler(async (req, res) => {
         }
 
         const user_type = student.role || instructor.role || admin.role;
+        const user_id = student.id || instructor.id || admin.id;
 
         const otpRecord = await OTP.findOne({ 
-            user: student.id || instructor.id || admin.id, 
+            user: user_id, 
             user_type: user_type.charAt(0).toUpperCase() + user_type.slice(1).toLowerCase(), 
             otp_code: otp_code 
         });
