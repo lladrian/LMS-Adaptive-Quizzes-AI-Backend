@@ -62,6 +62,10 @@ export const add_student_classroom = asyncHandler(async (req, res) => {
         if (!classroom) return res.status(400).json({ message: 'Classroom not found' });
         if (!student) return res.status(404).json({ message: 'Student not found.' });
 
+        // if() {
+
+        // }
+
         if (student.joined_classroom.includes(classroom.id)) {
             return res.status(400).json({ message: 'Classroom already exists.' });
         }
