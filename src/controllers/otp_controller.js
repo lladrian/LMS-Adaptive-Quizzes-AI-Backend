@@ -39,8 +39,7 @@ export const create_otp = asyncHandler(async (req, res) => {
     const { email } = req.body;
 
     try {
-        // Check if all required fields are provided
-        if (!user_id) {
+        if (!email) {
             return res.status(400).json({ message: "Please provide all fields (email)." });
         }
 
@@ -120,7 +119,7 @@ export const otp_verification_email_verification = asyncHandler(async (req, res)
         const createdAt = new Date(otpRecord.created_at);
         const diffInMinutes = (now - createdAt) / 1000 / 60;
 
-        if (diffInMinutes > 5) {
+        if (diffInMinutes > 3) {
             return res.status(400).json({ message: "OTP has expired." });
         }
 
@@ -183,7 +182,7 @@ export const otp_verification_password = asyncHandler(async (req, res) => {
         const createdAt = new Date(otpRecord.created_at);
         const diffInMinutes = (now - createdAt) / 1000 / 60;
 
-        if (diffInMinutes > 5) {
+        if (diffInMinutes > 3) {
             return res.status(400).json({ message: "OTP has expired." });
         }
 
