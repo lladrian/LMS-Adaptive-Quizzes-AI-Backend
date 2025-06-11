@@ -5,6 +5,8 @@
 5.  npm install multer
 6.  npm install pdf-parse
 7.  npm install mammoth
+8.  npm install nodemailer
+
 
 
 

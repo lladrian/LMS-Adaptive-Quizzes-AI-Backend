@@ -86,6 +86,26 @@ export const get_all_answer_specific_exam = asyncHandler(async (req, res) => {
         }
 
         const answers = await AnswerExam.find({ exam: exam.id }).populate('student');
+    
+
+        return res.status(200).json({ data: answers });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all answers.' });
+    }
+});
+
+export const get_all_missing_answer_specific_exam = asyncHandler(async (req, res) => {  
+    const { exam_id } = req.params; // Get the meal ID from the request parameters
+  
+    try {
+        const exam = await Exam.findById(exam_id).populate('classroom');
+
+        if (!exam) {
+            return res.status(404).json({ message: 'Exam not found.' });
+        }
+
+        const answers = await AnswerExam.find({ exam: exam.id, submitted_at: { $ne: null } }).populate('student');
+        const students = await Student.find({ role: 'student' });
 
         return res.status(200).json({ data: answers });
     } catch (error) {

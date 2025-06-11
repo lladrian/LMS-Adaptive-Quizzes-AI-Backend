@@ -27,13 +27,12 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 
 export const create_classroom = asyncHandler(async (req, res) => {
     const { classroom_name, subject_code, instructor, classroom_code, description, programming_language } = req.body;
-    
+        
     try {
         // Check if all required fields are provided
         if (!classroom_name || !subject_code || !instructor || !classroom_code || !programming_language) {
             return res.status(400).json({ message: "Please provide all fields (classroom_name, subject_code, instructor, classroom_code, description, programming_language)." });
         }
-   
         const newClassroom = new Classroom({
             classroom_name: classroom_name,
             subject_code: subject_code,
@@ -318,11 +317,11 @@ export const get_all_classroom_specific_instructor = asyncHandler(async (req, re
 
 export const update_classroom = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { classroom_name, subject_code, description, programming_language } = req.body;
+    const { classroom_name, subject_code, description, programming_language, quiz, midterm, final, activity } = req.body;
 
     try {
-        if (!classroom_name || !subject_code || !description || !programming_language) {
-            return res.status(400).json({ message: "All fields are required: classroom_name, description, programming_language and subject_code." });
+        if (!classroom_name || !subject_code || !description || !programming_language || !quiz || !midterm || !final || !activity) {
+            return res.status(400).json({ message: "All fields are required: classroom_name, description, programming_language, quiz, midterm, final, activity and subject_code." });
         }
 
         const updatedClassroom = await Classroom.findById(id);
@@ -335,7 +334,11 @@ export const update_classroom = asyncHandler(async (req, res) => {
         updatedClassroom.classroom_name = classroom_name ? classroom_name : updatedClassroom.classroom_name;
         updatedClassroom.subject_code = subject_code ? subject_code : updatedClassroom.subject_code;
         updatedClassroom.programming_language = programming_language ? programming_language : updatedClassroom.programming_language;
-      
+        updatedClassroom.quiz = quiz ? quiz : updatedClassroom.quiz;
+        updatedClassroom.midterm = midterm ? midterm : updatedClassroom.midterm;
+        updatedClassroom.final = final ? final : updatedClassroom.final;
+        updatedClassroom.activity = activity ? activity : updatedClassroom.activity;
+
         await updatedClassroom.save();
 
         return res.status(200).json({ data: 'Classroom successfully updated.' });

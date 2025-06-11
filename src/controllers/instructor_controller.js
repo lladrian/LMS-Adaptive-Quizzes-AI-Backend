@@ -64,11 +64,10 @@ export const create_instructor = asyncHandler(async (req, res) => {
 export const get_all_instructor = asyncHandler(async (req, res) => {    
     try {
         const instructors = await Instructor.find({ role: 'instructor' });
-        const admin_instructors = await Admin.find({ role: 'instructor' });
         const student_instructors = await Student.find({ role: 'instructor' });
 
         // Merge both results
-        const mergedInstructors = [...instructors, ...admin_instructors, ...student_instructors];
+        const mergedInstructors = [...instructors, ...student_instructors];
         
         return res.status(200).json({ data: mergedInstructors });
     } catch (error) {
@@ -126,11 +125,12 @@ export const update_instructor = asyncHandler(async (req, res) => {
         }
 
         const updatedInstructor = await Instructor.findById(id);
-        const updatedAdminInstructor = await Admin.findById(id);
         const updatedStudentInstructor = await Student.findById(id);
 
+       // const updatedAdminInstructor = await Admin.findById(id);
+
                    
-        if (!updatedInstructor && !updatedAdminInstructor && !updatedStudentInstructor) {
+        if (!updatedInstructor && !updatedStudentInstructor) {
             return res.status(404).json({ message: "User not found" });
         }
 
@@ -141,12 +141,12 @@ export const update_instructor = asyncHandler(async (req, res) => {
             await updatedInstructor.save();
         }
 
-        if(updatedAdminInstructor) {
-            updatedAdminInstructor.email = email ? email : updatedAdminInstructor.email;
-            updatedAdminInstructor.fullname = fullname ? fullname : updatedAdminInstructor.fullname;
+        // if(updatedAdminInstructor) {
+        //     updatedAdminInstructor.email = email ? email : updatedAdminInstructor.email;
+        //     updatedAdminInstructor.fullname = fullname ? fullname : updatedAdminInstructor.fullname;
                             
-            await updatedAdminInstructor.save();
-        }
+        //     await updatedAdminInstructor.save();
+        // }
 
         if(updatedStudentInstructor) {
             updatedStudentInstructor.email = email ? email : updatedStudentInstructor.email;

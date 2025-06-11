@@ -5,6 +5,7 @@ import Student from '../models/student.js';
 import Admin from '../models/admin.js';
 import Instructor from '../models/instructor.js';
 import OTP from '../models/otp.js';
+import mailer from '../mailer/otp_mailer.js'; // Import the mailer utility
 
 function storeCurrentDate(expirationAmount, expirationUnit) {
     // Get the current date and time in Asia/Manila timezone
@@ -35,56 +36,78 @@ function generateOTP(length = 6) {
 
 
 export const create_otp = asyncHandler(async (req, res) => {
-    const { user_type, user_id } = req.body;
+    const { email } = req.body;
 
     try {
         // Check if all required fields are provided
-        if (!user_type || !user_id) {
-            return res.status(400).json({ message: "Please provide all fields (user_type, user_id)." });
+        if (!user_id) {
+            return res.status(400).json({ message: "Please provide all fields (email)." });
+        }
+
+        const student = await Student.findOne({ email: email });
+        const instructor = await Instructor.findOne({ email: email });
+        const admin = await Admin.findOne({ email: email });
+
+
+        if (!student && !instructor && !admin) {
+            return res.status(404).json({ message: "User not found." });
         }
 
         const otpRecord = await OTP.findOne({ 
-            user: user_id
+            user: student.id || instructor.id || admin.id
         });
-  
+
+        const otp_code = generateOTP();
+        const user_type = student.role || instructor.role || admin.role;
 
         if(!otpRecord) {
             const newOTP = new OTP({
-                otp_code: generateOTP(),
-                user: user_id,
+                otp_code: otp_code,
+                user: student.id || instructor.id || admin.id,
                 user_type: user_type.charAt(0).toUpperCase() + user_type.slice(1).toLowerCase(),
                 created_at: storeCurrentDate(0, 'hours')
             });
 
             await newOTP.save();
+            mailer(email, "OTP Code", otp_code);
 
             return res.status(200).json({ data: 'New otp code successfully created.' });
         } else {
-            otpRecord.otp_code = generateOTP() ? generateOTP() : otpRecord.otp_code;
-            otpRecord.user = user_id ? user_id : otpRecord.user;
-            otpRecord.user_type = user_type ? user_type : otpRecord.user_type;
+            otpRecord.otp_code = otp_code ? otp_code : otpRecord.otp_code;
+            otpRecord.user = student.id || instructor.id || admin.id || otpRecord.user;
+            otpRecord.user_type = user_type ? user_type.charAt(0).toUpperCase() + user_type.slice(1).toLowerCase() : otpRecord.user_type;
             otpRecord.created_at = storeCurrentDate(0, 'hours') ? storeCurrentDate(0, 'hours') : otpRecord.created_at;
 
             await otpRecord.save();
+            mailer(email, "OTP Code", otp_code);
 
             return res.status(200).json({ data: 'New otp code successfully updated.' });
         }
-
     } catch (error) {
         return res.status(500).json({ error: 'Failed to create otp.', data : error });
     }
 });
 
 export const otp_verification_email_verification = asyncHandler(async (req, res) => {
-    const { otp_code, user_id, user_type } = req.body;
+    const { otp_code, email } = req.body;
 
     try {    
-        if (!otp_code || !user_id || !user_type) {
-            return res.status(400).json({ message: "Please provide all fields (otp_code, user_id, user_type)." });
+        if (!otp_code || !email) {
+            return res.status(400).json({ message: "Please provide all fields (otp_code, email)." });
         }
 
+        const student = await Student.findOne({ email: email });
+        const instructor = await Instructor.findOne({ email: email });
+        const admin = await Admin.findOne({ email: email });
+
+        if (!student && !instructor && !admin) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const user_type = student.role || instructor.role || admin.role;
+
         const otpRecord = await OTP.findOne({ 
-            user: user_id, 
+            user: student.id || instructor.id || admin.id, 
             user_type: user_type.charAt(0).toUpperCase() + user_type.slice(1).toLowerCase(), 
             otp_code: otp_code 
         });
@@ -129,15 +152,25 @@ export const otp_verification_email_verification = asyncHandler(async (req, res)
 
 
 export const otp_verification_password = asyncHandler(async (req, res) => {
-    const { otp_code, user_id, user_type, password } = req.body;
+    const { otp_code, email, password } = req.body;
 
     try {    
-        if (!otp_code || !user_id || !user_type || !password) {
-            return res.status(400).json({ message: "Please provide all fields (otp_code, user_id, user_type, password)." });
+        if (!otp_code || !email || !password) {
+            return res.status(400).json({ message: "Please provide all fields (otp_code, email, password)." });
         }
 
+        const student = await Student.findOne({ email: email });
+        const instructor = await Instructor.findOne({ email: email });
+        const admin = await Admin.findOne({ email: email });
+
+        if (!student && !instructor && !admin) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const user_type = student.role || instructor.role || admin.role;
+
         const otpRecord = await OTP.findOne({ 
-            user: user_id, 
+            user: student.id || instructor.id || admin.id, 
             user_type: user_type.charAt(0).toUpperCase() + user_type.slice(1).toLowerCase(), 
             otp_code: otp_code 
         });
@@ -164,6 +197,10 @@ export const otp_verification_password = asyncHandler(async (req, res) => {
             _id: otp.user.id
         });
 
+        const adminPassword = await Admin.findOne({ 
+            _id: otp.user.id
+        });
+
         if(studentPassword) {
              studentPassword.password =  password ? hashConverterMD5(password) : studentPassword.password;
              await studentPassword.save();
@@ -172,6 +209,11 @@ export const otp_verification_password = asyncHandler(async (req, res) => {
         if(instructorPassword) {
             instructorPassword.password = password ?  hashConverterMD5(password) : instructorPassword.password;
             await instructorPassword.save();
+        }
+
+        if(adminPassword) {
+            adminPassword.password = password ?  hashConverterMD5(password) : adminPassword.password;
+            await adminPassword.save();
         }
 
         return res.status(200).json({ data: "OTP verified successfully." });

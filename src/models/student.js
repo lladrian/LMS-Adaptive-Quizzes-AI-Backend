@@ -6,8 +6,8 @@ const StudentSchema = new mongoose.Schema({
     required: true
   }, 
   student_id_number: {
-    type: String,
-    required: false,
+    type: Number,
+    required: true,
   }, 
   password: { 
     type: String, 

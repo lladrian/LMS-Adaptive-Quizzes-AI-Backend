@@ -13,14 +13,18 @@ export const promote_user = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: "All fields are required: role_name." });
         }
 
-        const updatedAdmin = await Admin.findById(id);
+        //const updatedAdmin = await Admin.findById(id);
         const updatedInstructor = await Instructor.findById(id);
         const updatedStudent = await Student.findById(id);
 
-        if(updatedAdmin) {
-            updatedAdmin.role = role_name ? role_name : updatedAdmin.role;
-            await updatedAdmin.save();
-        }
+        if(!updatedInstructor && !updatedStudent) {
+            return res.status(404).json({ message: "User not found." });
+        }      
+
+        // if(updatedAdmin) {
+        //     updatedAdmin.role = role_name ? role_name : updatedAdmin.role;
+        //     await updatedAdmin.save();
+        // }
 
         if(updatedInstructor) {
             updatedInstructor.role = role_name ? role_name : updatedInstructor.role;
@@ -35,9 +39,7 @@ export const promote_user = asyncHandler(async (req, res) => {
             await updatedStudent.save();
         }
 
-        if(!updatedAdmin && !updatedInstructor && !updatedStudent) {
-            return res.status(404).json({ message: "User not found." });
-        }      
+
 
         return res.status(200).json({ data: 'User role successfully updated.' });
     } catch (error) {
