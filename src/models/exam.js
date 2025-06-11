@@ -34,6 +34,10 @@ const ExamSchema = new mongoose.Schema({
     type: String,
     default: "exam"
   },
+  grading_breakdown: {
+    type: String,
+    required: true
+  },
   submission_time: { 
     type: Number, 
     required: true
