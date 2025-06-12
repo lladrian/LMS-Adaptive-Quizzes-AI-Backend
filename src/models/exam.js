@@ -61,6 +61,11 @@ const ExamSchema = new mongoose.Schema({
     enum: ['final', 'midterm'],
     required: true
   },
+  answer_type: {
+    type: String,
+    enum: ['programming', 'options'],
+    required: true
+  },
   submission_time: { 
     type: Number, 
     required: true

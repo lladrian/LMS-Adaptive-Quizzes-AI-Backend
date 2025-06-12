@@ -18,14 +18,15 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
 }
 
 export const create_exam_option = asyncHandler(async (req, res) => {
-    const { classroom_id, question_option, time_limit, title, description, grading_breakdown } = req.body;
+    const { classroom_id, question_option, time_limit, title, description, grading_breakdown, answer_type } = req.body;
     
     try {
-        if (!classroom_id || !question_option || !time_limit || !title || !description || !grading_breakdown) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, question_option, time_limit, title, description, points, grading_breakdown)." });
+        if (!classroom_id || !question_option || !time_limit || !title || !description || !grading_breakdown || !answer_type) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, question_option, time_limit, title, description, points, grading_breakdown, answer_type)." });
         }
    
         const newExam = new Exam({
+            answer_type: answer_type,
             classroom: classroom_id,
             question_option: question_option,
             title: title,
@@ -45,14 +46,15 @@ export const create_exam_option = asyncHandler(async (req, res) => {
 
 
 export const create_exam = asyncHandler(async (req, res) => {
-    const { classroom_id, question, time_limit, title, description, grading_breakdown } = req.body;
+    const { classroom_id, question, time_limit, title, description, grading_breakdown, answer_type } = req.body;
     
     try {
-        if (!classroom_id || !question || !time_limit || !title || !description || !grading_breakdown) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, question, time_limit, title, description, points, grading_breakdown)." });
+        if (!classroom_id || !question || !time_limit || !title || !description || !grading_breakdown || !answer_type) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, question, time_limit, title, description, points, grading_breakdown, answer_type)." });
         }
    
         const newExam = new Exam({
+            answer_type: answer_type,
             classroom: classroom_id,
             question: question,
             title: title,
@@ -134,11 +136,11 @@ export const get_specific_exam = asyncHandler(async (req, res) => {
 
 export const update_exam_option = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { classroom_id, question_option, time_limit, title, description, grading_breakdown} = req.body;
+    const { classroom_id, question_option, time_limit, title, description, grading_breakdown, answer_type } = req.body;
 
     try {
-        if (!classroom_id || !question_option || !title || !description || !grading_breakdown) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, question_option, title, description, grading_breakdown)." });
+        if (!classroom_id || !question_option || !title || !description || !grading_breakdown || !answer_type) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, question_option, title, description, grading_breakdown, answer_type)." });
         }
 
         const updatedExam = await Exam.findById(id);
@@ -153,6 +155,7 @@ export const update_exam_option = asyncHandler(async (req, res) => {
         updatedExam.description = description ? description : updatedExam.description;
         updatedExam.submission_time = time_limit ? time_limit : updatedExam.submission_time;
         updatedExam.grading_breakdown = grading_breakdown ? grading_breakdown : updatedExam.grading_breakdown;
+        updatedExam.answer_type = answer_type ? answer_type : updatedExam.answer_type;
                 
         await updatedExam.save();
 
@@ -165,11 +168,11 @@ export const update_exam_option = asyncHandler(async (req, res) => {
 
 export const update_exam = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { classroom_id, question, time_limit, title, description, grading_breakdown} = req.body;
+    const { classroom_id, question, time_limit, title, description, grading_breakdown, answer_type } = req.body;
 
     try {
-        if (!classroom_id || !question || !title || !description || !grading_breakdown) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, question, title, description, grading_breakdown)." });
+        if (!classroom_id || !question || !title || !description || !grading_breakdown || !answer_type) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, question, title, description, grading_breakdown, answer_type)." });
         }
 
         const updatedExam = await Exam.findById(id);
@@ -184,7 +187,8 @@ export const update_exam = asyncHandler(async (req, res) => {
         updatedExam.description = description ? description : updatedExam.description;
         updatedExam.submission_time = time_limit ? time_limit : updatedExam.submission_time;
         updatedExam.grading_breakdown = grading_breakdown ? grading_breakdown : updatedExam.grading_breakdown;
-                
+        updatedExam.answer_type = answer_type ? answer_type : updatedExam.answer_type;
+        
         await updatedExam.save();
 
         return res.status(200).json({ data: 'Exam successfully updated.' });

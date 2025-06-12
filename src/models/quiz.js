@@ -57,6 +57,11 @@ const QuizSchema = new mongoose.Schema({
     type: String,
     default: "quiz"
   },
+  answer_type: {
+    type: String,
+    enum: ['programming', 'options'],
+    required: true
+  },
   grading_breakdown: {
     type: String,
     default: "quiz"

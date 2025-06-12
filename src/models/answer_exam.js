@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 
 const AnswerSchema = new mongoose.Schema({
   questionId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
+    type: String,
+    required: false
   },
   line_of_code: {
     type: String,
@@ -19,6 +19,26 @@ const AnswerSchema = new mongoose.Schema({
   }
 });
 
+const AnswerOptionSchema = new mongoose.Schema({
+  questionId: {
+    type: String,
+    required: false
+  },
+  selected_option: {
+    type: String,
+    required: false
+  },
+  points: {
+    type: Number,
+    default: 0
+  },
+  is_correct: {
+    type: Number,
+    default: 0
+  }
+});
+
+
 const AnswerExamSchema = new mongoose.Schema({
   exam: {
     type: mongoose.Schema.Types.ObjectId,
@@ -32,6 +52,10 @@ const AnswerExamSchema = new mongoose.Schema({
   },
   answers: {
     type: [AnswerSchema],
+    default: [] // ✅ default to empty array
+  },
+  answers_option: {
+    type: [AnswerOptionSchema],
     default: [] // ✅ default to empty array
   },
   opened_at: {

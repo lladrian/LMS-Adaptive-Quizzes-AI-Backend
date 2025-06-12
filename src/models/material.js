@@ -22,6 +22,10 @@ const MaterialSchema = new mongoose.Schema({
       }
     }
   ],
+  answer_type: {
+    type: String,
+    default: "programming"
+  },
   grading_breakdown: {
     type: String,
     default: "activity"

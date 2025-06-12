@@ -14,7 +14,7 @@ const GradingSchema = new mongoose.Schema({
     default: 30
   },
   activity: {
-    type: String,
+    type: Number,
     default: 20
   }
 });

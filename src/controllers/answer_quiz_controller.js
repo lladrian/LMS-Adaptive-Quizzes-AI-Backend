@@ -138,6 +138,47 @@ export const get_specific_answer = asyncHandler(async (req, res) => {
 
 
 
+export const create_answer_option = asyncHandler(async (req, res) => {
+    const { array_answers_options } = req.body;
+    const { quiz_id, student_id } = req.params; // Get the meal ID from the request parameters
+    const now = moment.tz('Asia/Manila');
+
+    try {
+        if (!array_answers_options) {
+            return res.status(400).json({ message: "Please provide all fields (array_answers_options)." });
+        }
+   
+        const quiz = await Quiz.findById(quiz_id);
+
+        if (!quiz) {
+            return res.status(404).json({ message: 'Quiz not found.' });
+        }
+       
+        const answer = await AnswerQuiz.findOne({
+            quiz: quiz.id,
+            student: student_id
+        });
+
+        if (answer && answer.submitted_at) {
+            return res.status(400).json({ message: 'Sorry! You can no longer submit your quiz. Already submitted.' });
+        } 
+
+        if(!answer) {
+            return res.status(400).json({ message: 'Not yet taking the quiz.' });
+        }
+    
+        answer.answers_option = array_answers_options;
+        answer.submitted_at = storeCurrentDate(0, 'hours');
+
+        await answer.save();
+
+        return res.status(200).json({ message: 'New answer successfully created.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to create answer.' });
+    }
+});
+
+
 export const create_answer = asyncHandler(async (req, res) => {
     const { array_answers } = req.body;
     const { quiz_id, student_id } = req.params; // Get the meal ID from the request parameters
