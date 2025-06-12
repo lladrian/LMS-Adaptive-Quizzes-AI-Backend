@@ -17,18 +17,6 @@ const QuizSchema = new mongoose.Schema({
         type: String,
         required: false
       },
-      points: {
-        type: Number,
-        required: false
-      }
-    }
-  ],
-  question_option: [
-    {
-      text: {
-        type: String,
-        required: false
-      },
       options: {
         option_1: { type: String, required: false },
         option_2: { type: String, required: false },
@@ -42,7 +30,12 @@ const QuizSchema = new mongoose.Schema({
       points: {
         type: Number,
         required: false
-      }
+      },
+      answer_type: {
+        type: String,
+        enum: ['programming', 'options'],
+        required: true
+      },
     }
   ],
   description: { 
@@ -56,11 +49,6 @@ const QuizSchema = new mongoose.Schema({
   type: {
     type: String,
     default: "quiz"
-  },
-  answer_type: {
-    type: String,
-    enum: ['programming', 'options'],
-    required: true
   },
   grading_breakdown: {
     type: String,

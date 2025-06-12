@@ -16,18 +16,6 @@ const ExamSchema = new mongoose.Schema({
         type: String,
         required: false
       },
-      points: {
-        type: Number,
-        required: false
-      }
-    }
-  ],
-  question_option: [
-    {
-      text: {
-        type: String,
-        required: false
-      },
       options: {
         option_1: { type: String, required: false },
         option_2: { type: String, required: false },
@@ -41,7 +29,12 @@ const ExamSchema = new mongoose.Schema({
       points: {
         type: Number,
         required: false
-      }
+      },
+      answer_type: {
+        type: String,
+        enum: ['programming', 'options'],
+        required: true
+      },
     }
   ],
   description: { 
@@ -59,11 +52,6 @@ const ExamSchema = new mongoose.Schema({
   grading_breakdown: {
     type: String,
     enum: ['final', 'midterm'],
-    required: true
-  },
-  answer_type: {
-    type: String,
-    enum: ['programming', 'options'],
     required: true
   },
   submission_time: { 

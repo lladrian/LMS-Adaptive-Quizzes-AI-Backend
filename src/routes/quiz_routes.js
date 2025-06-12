@@ -7,9 +7,9 @@ quizRoutes.get('/get_specific_quiz_specific_answer/:quiz_id/:student_id', QuizCo
 quizRoutes.get('/get_all_quiz_specific_classroom/:classroom_id', QuizController.get_all_quiz_specific_classroom);
 quizRoutes.get('/get_specific_quiz/:quiz_id', QuizController.get_specific_quiz);
 quizRoutes.post('/add_quiz', QuizController.create_quiz);
-quizRoutes.post('/add_quiz_option', QuizController.create_quiz_option);
+//quizRoutes.post('/add_quiz_option', QuizController.create_quiz_option);
 quizRoutes.put('/update_quiz/:id', QuizController.update_quiz);
-quizRoutes.put('/update_quiz_option/:id', QuizController.update_quiz_option);
+//quizRoutes.put('/update_quiz_option/:id', QuizController.update_quiz_option);
 quizRoutes.delete('/delete_quiz/:id', QuizController.delete_quiz);
 
 
