@@ -9,21 +9,6 @@ const AnswerSchema = new mongoose.Schema({
     type: String,
     required: false
   },
-  points: {
-    type: Number,
-    default: 0
-  },
-  is_correct: {
-    type: Number,
-    default: 0
-  }
-});
-
-const AnswerOptionSchema = new mongoose.Schema({
-  questionId: {
-    type: String,
-    required: false
-  },
   selected_option: {
     type: String,
     required: false
@@ -52,10 +37,6 @@ const AnswerExamSchema = new mongoose.Schema({
   },
   answers: {
     type: [AnswerSchema],
-    default: [] // ✅ default to empty array
-  },
-  answers_option: {
-    type: [AnswerOptionSchema],
     default: [] // ✅ default to empty array
   },
   opened_at: {

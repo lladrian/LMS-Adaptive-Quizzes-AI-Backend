@@ -3,6 +3,7 @@ import moment from 'moment-timezone';
 import dotenv from 'dotenv';
 import AnswerExam from '../models/answer_exam.js';
 import Exam from '../models/exam.js';
+import Student from '../models/student.js';
 import Classroom from '../models/classroom.js';
 
 function storeCurrentDate(expirationAmount, expirationUnit) {
@@ -106,6 +107,7 @@ export const get_all_student_missing_answer_specific_exam = asyncHandler(async (
 
         const answers = await AnswerExam.find({ exam: exam.id, submitted_at: { $ne: null } }).populate('student');
         const answeredStudentIds = answers.map(ans => ans.student._id);
+  
         const students = await Student.find({
         role: 'student',
         _id: { $nin: answeredStudentIds }

@@ -3,6 +3,7 @@ import moment from 'moment-timezone';
 import dotenv from 'dotenv';
 import AnswerQuiz from '../models/answer_quiz.js';
 import Quiz from '../models/quiz.js';
+import Student from '../models/student.js';
 import Classroom from '../models/classroom.js';
 
 function storeCurrentDate(expirationAmount, expirationUnit) {

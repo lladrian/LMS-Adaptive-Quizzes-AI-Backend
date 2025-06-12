@@ -22,7 +22,7 @@ export const create_exam_option = asyncHandler(async (req, res) => {
     
     try {
         if (!classroom_id || !question_option || !time_limit || !title || !description || !grading_breakdown) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, question_option, time_limit, title, description, points, grading_breakdown)." });
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, question_option, time_limit, title, description, grading_breakdown)." });
         }
    
         const newExam = new Exam({
@@ -49,7 +49,7 @@ export const create_exam = asyncHandler(async (req, res) => {
     
     try {
         if (!classroom_id || !question || !time_limit || !title || !description || !grading_breakdown) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, question, time_limit, title, description, points, grading_breakdown)." });
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, question, time_limit, title, description, grading_breakdown)." });
         }
    
         const newExam = new Exam({

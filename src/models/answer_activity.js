@@ -9,10 +9,6 @@ const AnswerSchema = new mongoose.Schema({
     type: String,
     required: false
   },
-  selected_option: {
-    type: String,
-    required: false
-  },
   points: {
     type: Number,
     default: 0
@@ -24,10 +20,10 @@ const AnswerSchema = new mongoose.Schema({
 });
 
 
-const AnswerQuizSchema = new mongoose.Schema({
-  quiz: {
+const AnswerActivitySchema = new mongoose.Schema({
+  material: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Quiz', // reference to the Instructor model
+    ref: 'Material', // reference to the Instructor model
     required: true
   },
   student: {
@@ -38,10 +34,6 @@ const AnswerQuizSchema = new mongoose.Schema({
   answers: {
     type: [AnswerSchema],
     default: [] // ✅ default to empty array
-  },
-  opened_at: {
-    type: String,
-    default: null
   },
   submitted_at: {
     type: String,
@@ -54,4 +46,4 @@ const AnswerQuizSchema = new mongoose.Schema({
 });
 
 
-export default mongoose.model('AnswerQuiz', AnswerQuizSchema);
+export default mongoose.model('AnswerActivity', AnswerActivitySchema);
