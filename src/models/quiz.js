@@ -13,7 +13,7 @@ const QuizSchema = new mongoose.Schema({
         type: String,
         required: false
       },
-      expected_output: {
+      expected_output: { 
         type: String,
         required: false
       },

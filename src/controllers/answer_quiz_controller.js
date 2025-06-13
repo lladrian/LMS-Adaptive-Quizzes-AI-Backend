@@ -201,14 +201,22 @@ export const create_answer = asyncHandler(async (req, res) => {
             student: student_id
         });
 
-        if (answer) {
-            const opened_quiz = moment.tz(answer.opened_at, "YYYY-MM-DD HH:mm:ss", 'Asia/Manila');
-            const diffMinutes = now.diff(opened_quiz, 'minutes');
+        // if (answer) {
+        //     const opened_quiz = moment.tz(answer.opened_at, "YYYY-MM-DD HH:mm:ss", 'Asia/Manila');
+        //     const diffMinutes = now.diff(opened_quiz, 'minutes');
            
-            if (diffMinutes >= quiz.submission_time) {
-                return res.status(400).json({ message: 'Sorry! You can no longer submit your quiz. The time is up.' });
-            }
-        } else {
+        //     if (diffMinutes >= quiz.submission_time) {
+        //         return res.status(400).json({ message: 'Sorry! You can no longer submit your quiz. The time is up.' });
+        //     }
+        // } else {
+        //     return res.status(400).json({ message: 'Not yet taking the quiz.' });
+        // }
+
+        if (answer && answer.submitted_at) {
+            return res.status(400).json({ message: 'Sorry! You can no longer submit your quiz. Already submitted.' });
+        } 
+
+        if(!answer) {
             return res.status(400).json({ message: 'Not yet taking the quiz.' });
         }
     
