@@ -105,7 +105,12 @@ export const create_material = asyncHandler(async (req, res) => {
 
         await newMaterial.save();
 
-        return res.status(200).json({ message: 'New material successfully created.' });
+        const material = {
+            material : newMaterial, 
+            message: 'New material successfully created.'
+        };
+
+        return res.status(200).json({ data: material });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to create material.' });
     }
