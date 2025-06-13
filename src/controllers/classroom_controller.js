@@ -59,7 +59,7 @@ export const add_student_classroom = asyncHandler(async (req, res) => {
         const classroom = await Classroom.findById(classroom_id);
         const student = await Student.findOne({ student_id_number });
 
-        if (!classroom) return res.status(400).json({ message: 'Classroom not found' });
+        if (!classroom) return res.status(404).json({ message: 'Classroom not found' });
         if (!student) return res.status(404).json({ message: 'Student not found.' });
 
         // if() {

@@ -2,7 +2,9 @@ import asyncHandler from 'express-async-handler';
 import moment from 'moment-timezone';
 import dotenv from 'dotenv';
 import AnswerQuiz from '../models/answer_quiz.js';
+import AnswerExam from '../models/answer_exam.js';
 import Quiz from '../models/quiz.js';
+import Exam from '../models/exam.js';
 import Student from '../models/student.js';
 import Classroom from '../models/classroom.js';
 
@@ -19,244 +21,111 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
     return formattedExpirationDateTime;
 }
 
-export const take_quiz = asyncHandler(async (req, res) => {
-    const { quiz_id, student_id } = req.params; // Get the meal ID from the request parameters    
+export const compute_grade = asyncHandler(async (req, res) => {
+    const { classroom_id, student_id } = req.params; // Get the meal ID from the request parameters    
 
-    try {
-        const existingAnswer = await AnswerQuiz.findOne({
-            quiz: quiz_id,
-            student: student_id
-        });
-
-        if (existingAnswer) {
-            return res.status(400).json({ message: 'You have already started this quiz.' });
-        }
-      
-   
-        const newAnswer = new AnswerQuiz({
-            quiz: quiz_id,
-            student: student_id,
-            opened_at: storeCurrentDate(0, 'hours'),
-            created_at: storeCurrentDate(0, 'hours'),
-        });
-
-        await newAnswer.save();
-
-        return res.status(200).json({ message: 'New quiz successfully created.' });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to create quiz.' });
-    }
-});
-
-
-export const get_all_answer_specific_student_specific_classroom = asyncHandler(async (req, res) => {  
-    const { classroom_id, student_id } = req.params; // Get the meal ID from the request parameters
-  
     try {
         const classroom = await Classroom.findById(classroom_id);
-
-        if (!classroom) {
-            return res.status(404).json({ message: 'Classroom not found.' });
-        }
+        const student = await Student.findById(student_id);
         
-        const all_answers  = await AnswerQuiz
-        .find({ student: student_id }) // filter by student ID
-        .populate({
-            path: 'quiz',
-            populate: { path: 'classroom' }
+        if (!classroom) return res.status(404).json({ message: 'Classroom not found' });
+        if (!student) return res.status(404).json({ message: 'Student not found.' });
+
+        const quizzes = await Quiz.find({
+            classroom: classroom_id, // assuming classroom_id is a valid ObjectId
         });
 
-        const answers = all_answers.filter(answer => 
-            answer.quiz?.classroom?._id.toString() === classroom.id.toString()
+        const exams = await Exam.find({
+            classroom: classroom_id, // assuming classroom_id is a valid ObjectId
+        });
+
+       const examsWithAnswers = await Promise.all(
+            exams.map(async (exam) => {
+                const answer = await AnswerExam.findOne({
+                exam: exam._id,
+                student: student_id,
+                });
+
+                const totalPoints = exam.question.reduce(
+                (sum, q) => sum + (q.points || 0),
+                0
+                );
+
+                const earnedPoints =
+                answer?.answers?.reduce((sum, a) => sum + (a.points || 0), 0) || 0;
+
+                return {
+                exam,
+                answer,
+                totalPoints,
+                earnedPoints,
+                };
+            })
         );
 
-        return res.status(200).json({ data: answers });
+        const quizzesWithAnswers = await Promise.all(
+            quizzes.map(async (quiz) => {
+                const answer = await AnswerQuiz.findOne({
+                quiz: quiz._id,
+                student: student_id,
+                });
+
+                const totalPoints = quiz.question.reduce((sum, q) => sum + (q.points || 0), 0);
+
+                const earnedPoints = answer?.answers?.reduce((sum, a) => sum + (a.points || 0), 0) || 0;
+
+                return {
+                quiz,
+                answer,
+                totalPoints,
+                earnedPoints,
+                };
+            })
+        );
+
+        const totalAllPointsQuiz = quizzesWithAnswers.reduce((sum, item) => sum + item.totalPoints, 0);
+        const totalAllEarnedQuiz = quizzesWithAnswers.reduce((sum, item) => sum + item.earnedPoints, 0);
+
+        const totalFinalPointsExam = examsWithAnswers
+        .filter(item => item.exam.grading_breakdown === 'final')
+        .reduce((sum, item) => sum + item.totalPoints, 0);
+
+        const totalFinalEarnedExam = examsWithAnswers
+        .filter(item => item.exam.grading_breakdown === 'final')
+        .reduce((sum, item) => sum + item.earnedPoints, 0);
+
+        const totalMidtermPointsExam = examsWithAnswers
+        .filter(item => item.exam.grading_breakdown === 'midterm')
+        .reduce((sum, item) => sum + item.totalPoints, 0);
+
+        const totalMidtermEarnedExam = examsWithAnswers
+        .filter(item => item.exam.grading_breakdown === 'midterm')
+        .reduce((sum, item) => sum + item.earnedPoints, 0);
+
+
+        const data = {
+            quiz: {
+                totalPoints: totalAllPointsQuiz,
+                earnedPoints: totalAllEarnedQuiz,
+            },
+            midterm: {
+                totalPoints: totalMidtermPointsExam,
+                earnedPoints: totalMidtermEarnedExam,
+            },
+            final: {
+                totalPoints: totalFinalPointsExam,
+                earnedPoints: totalFinalEarnedExam,
+            },
+            activity: {
+                totalPoints: 1,
+                earnedPoints: 1,
+            },
+        }
+
+     
+        return res.status(200).json({ data: data });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to get all answers.' });
+        return res.status(500).json({ error: 'Failed to calculate grade.' });
     }
 });
-
-
-
-
-export const get_all_answer_specific_quiz = asyncHandler(async (req, res) => {  
-    const { quiz_id } = req.params; // Get the meal ID from the request parameters
-  
-    try {
-        const quiz = await Quiz.findById(quiz_id).populate('classroom');
-
-        if (!quiz) {
-            return res.status(404).json({ message: 'Quiz not found.' });
-        }
-
-        const answers = await AnswerQuiz.find({ quiz: quiz.id }).populate('student');
-
-        return res.status(200).json({ data: answers });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to get all answers.' });
-    }
-});
-
-export const get_all_student_missing_answer_specific_quiz = asyncHandler(async (req, res) => {  
-    const { quiz_id } = req.params; // Get the meal ID from the request parameters
-  
-    try {
-        const quiz = await Quiz.findById(quiz_id).populate('classroom');
-
-        if (!quiz) {
-            return res.status(404).json({ message: 'Quiz not found.' });
-        }
-
-        const answers = await AnswerQuiz.find({ quiz: quiz.id, submitted_at: { $ne: null } }).populate('student');
-        const answeredStudentIds = answers.map(ans => ans.student._id);
-        const students = await Student.find({
-        role: 'student',
-        _id: { $nin: answeredStudentIds }
-        });
-
-        return res.status(200).json({ data: students });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to get all students have missing quiz.' });
-    }
-});
-
-
-export const get_specific_answer = asyncHandler(async (req, res) => {  
-    const { answer_id } = req.params; // Get the meal ID from the request parameters
-  
-    try {
-        const answer = await AnswerQuiz.findById(answer_id).populate('quiz').populate('student');
-
-        if (!answer) {
-            return res.status(404).json({ message: 'Answer not found.' });
-        }
-
-        return res.status(200).json({ data: answer });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to get specific answer.' });
-    }
-});
-
-
-
-export const create_answer_option = asyncHandler(async (req, res) => {
-    const { array_answers_options } = req.body;
-    const { quiz_id, student_id } = req.params; // Get the meal ID from the request parameters
-    const now = moment.tz('Asia/Manila');
-
-    try {
-        if (!array_answers_options) {
-            return res.status(400).json({ message: "Please provide all fields (array_answers_options)." });
-        }
-   
-        const quiz = await Quiz.findById(quiz_id);
-
-        if (!quiz) {
-            return res.status(404).json({ message: 'Quiz not found.' });
-        }
-       
-        const answer = await AnswerQuiz.findOne({
-            quiz: quiz.id,
-            student: student_id
-        });
-
-        if (answer && answer.submitted_at) {
-            return res.status(400).json({ message: 'Sorry! You can no longer submit your quiz. Already submitted.' });
-        } 
-
-        if(!answer) {
-            return res.status(400).json({ message: 'Not yet taking the quiz.' });
-        }
-    
-        answer.answers_option = array_answers_options;
-        answer.submitted_at = storeCurrentDate(0, 'hours');
-
-        await answer.save();
-
-        return res.status(200).json({ message: 'New answer successfully created.' });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to create answer.' });
-    }
-});
-
-
-export const create_answer = asyncHandler(async (req, res) => {
-    const { array_answers } = req.body;
-    const { quiz_id, student_id } = req.params; // Get the meal ID from the request parameters
-    const now = moment.tz('Asia/Manila');
-
-    try {
-        if (!array_answers) {
-            return res.status(400).json({ message: "Please provide all fields (array_answers)." });
-        }
-   
-        const quiz = await Quiz.findById(quiz_id);
-
-        if (!quiz) {
-            return res.status(404).json({ message: 'Quiz not found.' });
-        }
-       
-        const answer = await AnswerQuiz.findOne({
-            quiz: quiz.id,
-            student: student_id
-        });
-
-        // if (answer) {
-        //     const opened_quiz = moment.tz(answer.opened_at, "YYYY-MM-DD HH:mm:ss", 'Asia/Manila');
-        //     const diffMinutes = now.diff(opened_quiz, 'minutes');
-           
-        //     if (diffMinutes >= quiz.submission_time) {
-        //         return res.status(400).json({ message: 'Sorry! You can no longer submit your quiz. The time is up.' });
-        //     }
-        // } else {
-        //     return res.status(400).json({ message: 'Not yet taking the quiz.' });
-        // }
-
-        if (answer && answer.submitted_at) {
-            return res.status(400).json({ message: 'Sorry! You can no longer submit your quiz. Already submitted.' });
-        } 
-
-        if(!answer) {
-            return res.status(400).json({ message: 'Not yet taking the quiz.' });
-        }
-    
-
-        answer.answers = array_answers;
-        answer.submitted_at = storeCurrentDate(0, 'hours');
-
-        await answer.save();
-
-        return res.status(200).json({ message: 'New answer successfully created.' });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to create answer.' });
-    }
-});
-
-
-
-export const update_specific_student_quiz_points = asyncHandler(async (req, res) => {    
-    const { answer_quiz_id } = req.params; // Get the meal ID from the request parameters
-    const { points} = req.body;
-
-    try {
-        if (!points) {
-            return res.status(400).json({ message: "Please provide all fields (points)." });
-        }
-
-        const updatedAnswer = await AnswerQuiz.findById(answer_quiz_id);
-
-        if (!updatedAnswer) {
-            return res.status(404).json({ message: "Quiz not found" });
-        }
-        
-        updatedAnswer.points = points ? points : updatedAnswer.points;
-    
-        await updatedAnswer.save();
-
-        return res.status(200).json({ data: 'Quiz successfully updated.' });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to update quiz.' });
-    }
-});
-
 
