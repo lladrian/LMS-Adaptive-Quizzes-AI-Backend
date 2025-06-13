@@ -19,13 +19,13 @@ const MaterialSchema = new mongoose.Schema({
       points: {
         type: Number,
         required: false
-      }
+      },
+      answer_type: {
+        type: String,
+        default: "programming"
+      },
     }
   ],
-  answer_type: {
-    type: String,
-    default: "programming"
-  },
   grading_breakdown: {
     type: String,
     default: "activity"
@@ -41,6 +41,10 @@ const MaterialSchema = new mongoose.Schema({
   title: { 
     type: String, 
     required: true
+  },
+  type: {
+    type: String,
+    default: "activity"
   },
   created_at: {
     type: String,

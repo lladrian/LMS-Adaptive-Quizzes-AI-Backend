@@ -35,8 +35,9 @@ const upload = multer({ storage: storage });
 
 const materialRoutes = Router();
 
- 
+  
 materialRoutes.post('/add_material', upload.single('file_uploaded'), MaterialController.create_material);
+materialRoutes.post('/add_material_question/:id', MaterialController.create_material_question);
 materialRoutes.get('/extract_material/:material_id', MaterialController.extract_material);
 materialRoutes.get('/get_all_material_specific_classroom/:classroom_id', MaterialController.get_all_material_specific_classroom);
 materialRoutes.get('/get_specific_material/:material_id', MaterialController.get_specific_material);

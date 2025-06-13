@@ -21,6 +21,7 @@ import quizRoutes from "./routes/quiz_routes.js";
 import otp_routes from "./routes/otp_routes.js";
 import promoteRoutes from "./routes/promote_routes.js";
 import gradeRoutes from "./routes/grade_routes.js";
+import answerActivityRoutes from "./routes/answer_activity_routes.js";
 
 
 
@@ -66,9 +67,7 @@ app.use("/quizzes", quizRoutes);
 app.use("/otp", otp_routes);
 app.use("/promotes", promoteRoutes);
 app.use("/grades", gradeRoutes);
-
-
-
+app.use("/answer_activities", answerActivityRoutes);
 
 
 

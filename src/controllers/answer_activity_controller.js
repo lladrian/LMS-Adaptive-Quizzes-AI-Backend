@@ -49,13 +49,13 @@ export const get_all_answer_specific_student_specific_classroom = asyncHandler(a
 
 
 export const get_all_answer_specific_activity = asyncHandler(async (req, res) => {  
-    const { exam_id } = req.params; // Get the meal ID from the request parameters
+    const { material_id } = req.params; // Get the meal ID from the request parameters
   
     try {
-        const material = await Material.findById(exam_id).populate('classroom');
+        const material = await Material.findById(material_id).populate('classroom');
 
         if (!material) {
-            return res.status(404).json({ message: 'Activity not found.' });
+            return res.status(404).json({ message: 'Material not found.' });
         }
 
         const answers = await AnswerActivity.find({ material: material.id }).populate('student');
@@ -67,14 +67,14 @@ export const get_all_answer_specific_activity = asyncHandler(async (req, res) =>
     }
 });
 
-export const get_all_student_missing_answer_specific_exam = asyncHandler(async (req, res) => {  
-    const { exam_id } = req.params; // Get the meal ID from the request parameters
+export const get_all_student_missing_answer_specific_activity = asyncHandler(async (req, res) => {  
+    const { material_id } = req.params; // Get the meal ID from the request parameters
   
     try {
-        const material = await Material.findById(exam_id).populate('classroom');
+        const material = await Material.findById(material_id).populate('classroom');
 
         if (!material) {
-            return res.status(404).json({ message: 'Activity not found.' });
+            return res.status(404).json({ message: 'Material not found.' });
         }
 
         const answers = await AnswerActivity.find({ material: material.id, submitted_at: { $ne: null } }).populate('student');
@@ -92,11 +92,12 @@ export const get_all_student_missing_answer_specific_exam = asyncHandler(async (
 });
 
 
+
 export const get_specific_answer = asyncHandler(async (req, res) => {  
     const { answer_id } = req.params; // Get the meal ID from the request parameters
   
     try {
-        const answer = await AnswerActivity.findById(answer_id).populate('exam').populate('student');
+        const answer = await AnswerActivity.findById(answer_id).populate('material').populate('student');
 
         if (!answer) {
             return res.status(404).json({ message: 'Answer not found.' });
@@ -110,17 +111,17 @@ export const get_specific_answer = asyncHandler(async (req, res) => {
 
 export const create_answer = asyncHandler(async (req, res) => {
     const { array_answers } = req.body;
-    const { exam_id, student_id } = req.params; // Get the meal ID from the request parameters
+    const { material_id, student_id } = req.params; // Get the meal ID from the request parameters
 
     try {
         if (!array_answers) {
             return res.status(400).json({ message: "Please provide all fields (array_answers)." });
         }
    
-        const material = await Material.findById(exam_id);
+        const material = await Material.findById(material_id);
 
-         if (!material) {
-            return res.status(404).json({ message: 'Activity not found.' });
+        if (!material) {
+            return res.status(404).json({ message: 'Material not found.' });
         }
        
         const answer = await AnswerActivity.findOne({
@@ -132,15 +133,15 @@ export const create_answer = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: 'Sorry! You can no longer submit your activity. Already submitted.' });
         } 
 
-        if(!answer) {
-            return res.status(400).json({ message: 'Not yet taking the activity.' });
-        }
-    
-  
-        answer.answers = array_answers;
-        answer.submitted_at = storeCurrentDate(0, 'hours');
-
-        await answer.save();
+        const newAnswer = new AnswerActivity({
+            material: material.id,
+            student: student_id,
+            answers: array_answers,
+            submitted_at: storeCurrentDate(0, 'hours'),
+            created_at: storeCurrentDate(0, 'hours'),
+        });
+        
+        await newAnswer.save();
 
         return res.status(200).json({ message: 'New answer successfully created.' });
     } catch (error) {

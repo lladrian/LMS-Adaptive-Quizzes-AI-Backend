@@ -60,6 +60,30 @@ export const extract_material = asyncHandler(async (req, res) => {
     }
 });
 
+
+
+export const create_material_question = asyncHandler(async (req, res) => {    
+    const { id } = req.params; // Get the meal ID from the request parameters
+    const { classroom_id, description, title, question } = req.body;
+
+    try {
+        if (!classroom_id || !description || !title || !question) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, description, title, question)." });
+        }
+
+        const updatedMaterial = await Material.findById(id);
+
+        updatedMaterial.question = question ? question : updatedMaterial.question;
+
+        await updatedMaterial.save();
+
+        return res.status(200).json({ data: 'Material successfully updated.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update material.' });
+    }
+});
+
+
 export const create_material = asyncHandler(async (req, res) => {
     const { classroom_id, description, title } = req.body;
     const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
@@ -125,13 +149,13 @@ export const get_specific_material = asyncHandler(async (req, res) => {
 
 export const update_material = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { classroom_id, description, title } = req.body;
+    const { classroom_id, description, title, question } = req.body;
     const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
     const filename_insert = `materials/${filename}`; 
 
     try {
-        if (!classroom_id || !description || !title) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, description, title)." });
+        if (!classroom_id || !description || !title || !question) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, description, title, question)." });
         }
 
         const updatedMaterial = await Material.findById(id);
@@ -142,8 +166,8 @@ export const update_material = asyncHandler(async (req, res) => {
         updatedMaterial.description = description ? description : updatedMaterial.description;
         updatedMaterial.title = title ? title : updatedMaterial.title;
         updatedMaterial.material = req.file ? filename_insert : updatedMaterial.material;
+        updatedMaterial.question = question ? question : updatedMaterial.question;
 
-        
         if(req.file) {
             const filePath = path.join(uploadsDir, material.material);
         
