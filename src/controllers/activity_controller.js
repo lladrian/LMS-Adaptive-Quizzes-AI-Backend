@@ -1,7 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import moment from 'moment-timezone';
 import dotenv from 'dotenv';
-import Material from '../models/material.js';
+import Activity from '../models/activity.js';
 import AnswerActivity from '../models/answer_activity.js';
 import Student from '../models/student.js';
 
@@ -28,125 +28,58 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
     return formattedExpirationDateTime;
 }
 
-export const get_specific_material_specific_answer = asyncHandler(async (req, res) => {  
-    const { material_id, student_id } = req.params; // Get the meal ID from the request parameters
+
+export const get_specific_activity_specific_answer = asyncHandler(async (req, res) => {  
+    const { activity_id, student_id } = req.params; // Get the meal ID from the request parameters
 
     try {
-        const material = await Material.findById(material_id).populate('classroom');
+        const activity = await Activity.findById(activity_id).populate('classroom');
         const student = await Student.findById(student_id);
 
 
-        if (!material) {
-            return res.status(404).json({ message: 'Material not found.' });
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found.' });
         }
 
         const answer  = await AnswerActivity
-        .findOne({ student: student.id, material: material.id}) 
+        .findOne({ student: student.id, activity: activity.id}) 
         .populate({
-        path: 'material',
+        path: 'activity',
         populate: { path: 'classroom' }
         });
 
         return res.status(200).json({ data: answer });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to get specific material.' });
+        return res.status(500).json({ error: 'Failed to get specific activity.' });
     }
 });
 
-export const extract_material = asyncHandler(async (req, res) => {
-    const { material_id } = req.params; // Get the meal ID from the request parameters
-    
-    try {
-        const material = await Material.findById(material_id);
-
-        if (!material) {
-            return res.status(404).json({ message: 'Material not found.' });
-        }
-
-        const filePath = path.join(uploadsDir, material.material);
-        const ext = path.extname(filePath).toLowerCase();
-
-        if (material.material && ext === '.pdf') {
-           let text = "";
-           const dataBuffer = fs.readFileSync(filePath);
-           const pdfData = await pdf(dataBuffer);
-           text = pdfData.text;
-
-           return res.status(200).json({ data: text });
-        }
-
-        if (material.material && ext === '.docx') {
-            const result = await mammoth.extractRawText({ path: filePath });
-
-            return res.status(200).json({ data: result.value });
-        }
-
-         return res.status(200).json({ data: 'No file material or neither PDF nor DOCX file material.' });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to extract material.' });
-    }
-});
-
-
-
-export const create_material_question = asyncHandler(async (req, res) => {    
-    const { id } = req.params; // Get the meal ID from the request parameters
-    const { question } = req.body;
-
-    try {
-        if (!question) {
-            return res.status(400).json({ message: "Please provide all fields (question)." });
-        }
-        const updatedMaterial = await Material.findById(id);
-
-        if (!updatedMaterial) {
-            return res.status(404).json({ message: 'Material not found.' });
-        }
-
-        updatedMaterial.question = question ? question : updatedMaterial.question;
-
-        await updatedMaterial.save();
-
-        return res.status(200).json({ data: 'Material successfully updated.' });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to update material.' });
-    }
-});
-
-
-export const create_material = asyncHandler(async (req, res) => {
-    const { classroom_id, description, title } = req.body;
-    const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
-    const filename_insert = `materials/${filename}`; 
+export const create_activity = asyncHandler(async (req, res) => {
+    const { classroom_id, description, title, question } = req.body;
     
     try {
         // Check if all required fields are provided
-        if (!classroom_id || !description || !title) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, description, title)." });
+        if (!classroom_id || !description || !title || !question) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, description, title, question)." });
         }
    
-        const newMaterial = new Material({
+        const newActivity= new Activity({
+            question: question,
             classroom: classroom_id,
             title: title,
             description: description,
-            material: req.file ? filename_insert : null,
             created_at: storeCurrentDate(0, 'hours'),
         });
 
-        await newMaterial.save();
+        await newActivity.save();
 
-        const material = {
-            material : newMaterial, 
-            message: 'New material successfully created.'
-        };
-
-        return res.status(200).json({ data: material });
+        return res.status(200).json({ data: 'New activity successfully created.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to create material.' });
+        return res.status(500).json({ error: 'Failed to create activity.' });
     }
 });
 
-export const get_all_material_specific_classroom = asyncHandler(async (req, res) => {  
+export const get_all_activity_specific_classroom = asyncHandler(async (req, res) => {  
     const { classroom_id } = req.params; // Get the meal ID from the request parameters
   
     try {
@@ -156,82 +89,68 @@ export const get_all_material_specific_classroom = asyncHandler(async (req, res)
             return res.status(404).json({ message: 'Classroom not found.' });
         }
 
-        const materials = await Material.find({ 
+        const activity = await Activity.find({ 
             classroom: classroom.id 
         });
 
-        return res.status(200).json({ data: materials });
+        return res.status(200).json({ data: activity });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all materials specific classroom.' });
     }
 });
 
-export const get_specific_material = asyncHandler(async (req, res) => {  
-    const { material_id } = req.params; // Get the meal ID from the request parameters
+export const get_specific_activity = asyncHandler(async (req, res) => {  
+    const { activity_id } = req.params; // Get the meal ID from the request parameters
   
     try {
-        const material = await Material.findById(material_id).populate('classroom');
+        const activity = await Activity.findById(activity_id).populate('classroom');
 
-        if (!material) {
-            return res.status(404).json({ message: 'Material not found.' });
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found.' });
         }
 
-        return res.status(200).json({ data: material });
+        return res.status(200).json({ data: activity });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to get specific material.' });
+        return res.status(500).json({ error: 'Failed to get specific activity.' });
     }
 });
 
-export const update_material = asyncHandler(async (req, res) => {    
+export const update_activity = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
     const { classroom_id, description, title, question } = req.body;
-    const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
-    const filename_insert = `materials/${filename}`; 
+
 
     try {
         if (!classroom_id || !description || !title || !question) {
             return res.status(400).json({ message: "Please provide all fields (classroom_id, description, title, question)." });
         }
 
-        const updatedMaterial = await Material.findById(id);
-        const material = await Material.findById(id);
+        const updatedActivity = await Activity.findById(id);
 
+        updatedActivity.classroom = classroom_id ? classroom_id : updatedActivity.classroom;
+        updatedActivity.description = description ? description : updatedActivity.description;
+        updatedActivity.title = title ? title : updatedActivity.title;
+        updatedActivity.question = question ? question : updatedActivity.question;
 
-        updatedMaterial.classroom = classroom_id ? classroom_id : updatedMaterial.classroom;
-        updatedMaterial.description = description ? description : updatedMaterial.description;
-        updatedMaterial.title = title ? title : updatedMaterial.title;
-        updatedMaterial.material = req.file ? filename_insert : updatedMaterial.material;
-        updatedMaterial.question = question ? question : updatedMaterial.question;
+        await updatedActivity.save();
 
-        if(req.file) {
-            const filePath = path.join(uploadsDir, material.material);
-        
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    console.error('Error deleting file:', err);
-                }
-            });
-        }
-
-        await updatedMaterial.save();
-
-        return res.status(200).json({ data: 'Material successfully updated.' });
+        return res.status(200).json({ data: 'Activity successfully updated.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to update material.' });
+        return res.status(500).json({ error: 'Failed to update activity.' });
     }
 });
 
 
-export const delete_material = asyncHandler(async (req, res) => {    
+export const delete_activity = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
 
     try {
-        const deletedMaterial = await Material.findByIdAndDelete(id);
+        const deletedActivity = await Activity.findByIdAndDelete(id);
 
-        if (!deletedMaterial) return res.status(404).json({ message: 'Material not found' });
+        if (!deletedActivity) return res.status(404).json({ message: 'Activity not found' });
 
-        return res.status(200).json({ data: 'Material successfully deleted.' });
+        return res.status(200).json({ data: 'Activity successfully deleted.' });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to delete material.' });
+        return res.status(500).json({ error: 'Failed to delete activity.' });
     }
 });

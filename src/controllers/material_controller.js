@@ -28,30 +28,7 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
     return formattedExpirationDateTime;
 }
 
-export const get_specific_material_specific_answer = asyncHandler(async (req, res) => {  
-    const { material_id, student_id } = req.params; // Get the meal ID from the request parameters
 
-    try {
-        const material = await Material.findById(material_id).populate('classroom');
-        const student = await Student.findById(student_id);
-
-
-        if (!material) {
-            return res.status(404).json({ message: 'Material not found.' });
-        }
-
-        const answer  = await AnswerActivity
-        .findOne({ student: student.id, material: material.id}) 
-        .populate({
-        path: 'material',
-        populate: { path: 'classroom' }
-        });
-
-        return res.status(200).json({ data: answer });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to get specific material.' });
-    }
-});
 
 export const extract_material = asyncHandler(async (req, res) => {
     const { material_id } = req.params; // Get the meal ID from the request parameters
@@ -84,32 +61,6 @@ export const extract_material = asyncHandler(async (req, res) => {
          return res.status(200).json({ data: 'No file material or neither PDF nor DOCX file material.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to extract material.' });
-    }
-});
-
-
-
-export const create_material_question = asyncHandler(async (req, res) => {    
-    const { id } = req.params; // Get the meal ID from the request parameters
-    const { question } = req.body;
-
-    try {
-        if (!question) {
-            return res.status(400).json({ message: "Please provide all fields (question)." });
-        }
-        const updatedMaterial = await Material.findById(id);
-
-        if (!updatedMaterial) {
-            return res.status(404).json({ message: 'Material not found.' });
-        }
-
-        updatedMaterial.question = question ? question : updatedMaterial.question;
-
-        await updatedMaterial.save();
-
-        return res.status(200).json({ data: 'Material successfully updated.' });
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to update material.' });
     }
 });
 
@@ -184,13 +135,13 @@ export const get_specific_material = asyncHandler(async (req, res) => {
 
 export const update_material = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { classroom_id, description, title, question } = req.body;
+    const { classroom_id, description, title } = req.body;
     const filename = req.file ? req.file.filename : null; // Get the filename from the uploaded file
     const filename_insert = `materials/${filename}`; 
 
     try {
-        if (!classroom_id || !description || !title || !question) {
-            return res.status(400).json({ message: "Please provide all fields (classroom_id, description, title, question)." });
+        if (!classroom_id || !description || !title) {
+            return res.status(400).json({ message: "Please provide all fields (classroom_id, description, title)." });
         }
 
         const updatedMaterial = await Material.findById(id);
@@ -201,8 +152,7 @@ export const update_material = asyncHandler(async (req, res) => {
         updatedMaterial.description = description ? description : updatedMaterial.description;
         updatedMaterial.title = title ? title : updatedMaterial.title;
         updatedMaterial.material = req.file ? filename_insert : updatedMaterial.material;
-        updatedMaterial.question = question ? question : updatedMaterial.question;
-
+        
         if(req.file) {
             const filePath = path.join(uploadsDir, material.material);
         

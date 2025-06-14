@@ -21,9 +21,9 @@ const AnswerSchema = new mongoose.Schema({
   
 
 const AnswerActivitySchema = new mongoose.Schema({
-  material: {
+  activity: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Material', // reference to the Instructor model
+    ref: 'Activity', // reference to the Instructor model
     required: true
   },
   student: {

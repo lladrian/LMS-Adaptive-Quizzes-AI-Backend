@@ -3,6 +3,8 @@ import moment from 'moment-timezone';
 import dotenv from 'dotenv';
 import AnswerQuiz from '../models/answer_quiz.js';
 import AnswerExam from '../models/answer_exam.js';
+import AnswerActivity from '../models/answer_activity.js';
+import Activity  from '../models/activity.js';
 import Quiz from '../models/quiz.js';
 import Exam from '../models/exam.js';
 import Student from '../models/student.js';
@@ -38,6 +40,34 @@ export const compute_grade = asyncHandler(async (req, res) => {
         const exams = await Exam.find({
             classroom: classroom_id, // assuming classroom_id is a valid ObjectId
         });
+
+        const activities = await Activity.find({
+            classroom: classroom_id, // assuming classroom_id is a valid ObjectId
+        });
+
+        const activityWithAnswers = await Promise.all(
+            activities.map(async (activity) => {
+                const answer = await AnswerActivity.findOne({
+                activity: activity._id,
+                student: student_id,
+                });
+
+                const totalPoints = activity.question.reduce(
+                (sum, q) => sum + (q.points || 0),
+                0
+                );
+
+                const earnedPoints =
+                answer?.answers?.reduce((sum, a) => sum + (a.points || 0), 0) || 0;
+
+                return {
+                activity,
+                answer,
+                totalPoints,
+                earnedPoints,
+                };
+            })
+        );
 
        const examsWithAnswers = await Promise.all(
             exams.map(async (exam) => {
@@ -86,6 +116,10 @@ export const compute_grade = asyncHandler(async (req, res) => {
         const totalAllPointsQuiz = quizzesWithAnswers.reduce((sum, item) => sum + item.totalPoints, 0);
         const totalAllEarnedQuiz = quizzesWithAnswers.reduce((sum, item) => sum + item.earnedPoints, 0);
 
+        const totalAllPointsActivity = activityWithAnswers.reduce((sum, item) => sum + item.totalPoints, 0);
+        const totalAllEarnedActivity = activityWithAnswers.reduce((sum, item) => sum + item.earnedPoints, 0);
+
+
         const totalFinalPointsExam = examsWithAnswers
         .filter(item => item.exam.grading_breakdown === 'final')
         .reduce((sum, item) => sum + item.totalPoints, 0);
@@ -117,12 +151,11 @@ export const compute_grade = asyncHandler(async (req, res) => {
                 earnedPoints: totalFinalEarnedExam,
             },
             activity: {
-                totalPoints: 1,
-                earnedPoints: 1,
+                totalPoints: totalAllPointsActivity,
+                earnedPoints: totalAllEarnedActivity,
             },
         }
 
-     
         return res.status(200).json({ data: data });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to calculate grade.' });

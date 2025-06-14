@@ -2,7 +2,7 @@ import asyncHandler from 'express-async-handler';
 import moment from 'moment-timezone';
 import dotenv from 'dotenv';
 import AnswerActivity from '../models/answer_activity.js';
-import Material from '../models/material.js';
+import Activity from '../models/activity.js';
 import Student from '../models/student.js';
 import Classroom from '../models/classroom.js';
 
@@ -33,12 +33,12 @@ export const get_all_answer_specific_student_specific_classroom = asyncHandler(a
         const all_answers  = await AnswerActivity
         .find({ student: student_id }) // filter by student ID
         .populate({
-            path: 'exam',
+            path: 'activity',
             populate: { path: 'classroom' }
         });
 
         const answers = all_answers.filter(answer => 
-            answer.exam?.classroom?._id.toString() === classroom.id.toString()
+            answer.activity?.classroom?._id.toString() === classroom.id.toString()
         );
 
         return res.status(200).json({ data: answers });
@@ -47,18 +47,17 @@ export const get_all_answer_specific_student_specific_classroom = asyncHandler(a
     }
 });
 
-
 export const get_all_answer_specific_activity = asyncHandler(async (req, res) => {  
-    const { material_id } = req.params; // Get the meal ID from the request parameters
+    const { activity_id } = req.params; // Get the meal ID from the request parameters
   
     try {
-        const material = await Material.findById(material_id).populate('classroom');
+        const activity = await Activity.findById(activity_id).populate('classroom');
 
-        if (!material) {
-            return res.status(404).json({ message: 'Material not found.' });
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found.' });
         }
 
-        const answers = await AnswerActivity.find({ material: material.id }).populate('student');
+        const answers = await AnswerActivity.find({ activity: activity.id }).populate('student');
     
 
         return res.status(200).json({ data: answers });
@@ -67,17 +66,18 @@ export const get_all_answer_specific_activity = asyncHandler(async (req, res) =>
     }
 });
 
+
 export const get_all_student_missing_answer_specific_activity = asyncHandler(async (req, res) => {  
-    const { material_id } = req.params; // Get the meal ID from the request parameters
+    const { activity_id } = req.params; // Get the meal ID from the request parameters
   
     try {
-        const material = await Material.findById(material_id).populate('classroom');
+        const activity = await Activity.findById(activity_id).populate('classroom');
 
-        if (!material) {
-            return res.status(404).json({ message: 'Material not found.' });
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found.' });
         }
 
-        const answers = await AnswerActivity.find({ material: material.id, submitted_at: { $ne: null } }).populate('student');
+        const answers = await AnswerActivity.find({ activity: activity.id, submitted_at: { $ne: null } }).populate('student');
         const answeredStudentIds = answers.map(ans => ans.student._id);
   
         const students = await Student.find({
@@ -97,7 +97,7 @@ export const get_specific_answer = asyncHandler(async (req, res) => {
     const { answer_id } = req.params; // Get the meal ID from the request parameters
   
     try {
-        const answer = await AnswerActivity.findById(answer_id).populate('material').populate('student');
+        const answer = await AnswerActivity.findById(answer_id).populate('activity').populate('student');
 
         if (!answer) {
             return res.status(404).json({ message: 'Answer not found.' });
@@ -111,21 +111,21 @@ export const get_specific_answer = asyncHandler(async (req, res) => {
 
 export const create_answer = asyncHandler(async (req, res) => {
     const { array_answers } = req.body;
-    const { material_id, student_id } = req.params; // Get the meal ID from the request parameters
+    const { activity_id, student_id } = req.params; // Get the meal ID from the request parameters
 
     try {
         if (!array_answers) {
             return res.status(400).json({ message: "Please provide all fields (array_answers)." });
         }
    
-        const material = await Material.findById(material_id);
+        const activity = await Activity.findById(activity_id);
 
-        if (!material) {
-            return res.status(404).json({ message: 'Material not found.' });
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found.' });
         }
        
         const answer = await AnswerActivity.findOne({
-            material: material.id,
+            activity: activity.id,
             student: student_id
         });
 
@@ -134,7 +134,7 @@ export const create_answer = asyncHandler(async (req, res) => {
         } 
 
         const newAnswer = new AnswerActivity({
-            material: material.id,
+            activity: activity.id,
             student: student_id,
             answers: array_answers,
             submitted_at: storeCurrentDate(0, 'hours'),
