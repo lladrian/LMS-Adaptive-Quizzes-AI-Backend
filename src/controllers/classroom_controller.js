@@ -300,10 +300,7 @@ export const get_all_activities_specific_student_specific_classroom = asyncHandl
             student: student,
             all_activities,
             answered_activities,
-            unanswered_activities,
-            total_activity: all_activities.length,
-            total_answered,
-            total_unanswered
+            unanswered_activities
         };
        
         return res.status(200).json({ data: data });
