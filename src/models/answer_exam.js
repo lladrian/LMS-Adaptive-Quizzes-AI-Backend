@@ -40,6 +40,7 @@ const AnswerExamSchema = new mongoose.Schema({
     type: [AnswerSchema],
     default: [] // ✅ default to empty array
   },
+
   opened_at: {
     type: String,
     default: null

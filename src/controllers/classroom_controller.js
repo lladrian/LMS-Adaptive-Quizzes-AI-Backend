@@ -8,7 +8,12 @@ import Exam from '../models/exam.js';
 import Quiz from '../models/quiz.js';
 import Material from '../models/material.js';
 import Activity from '../models/activity.js';
-import ai_model from '../utils/gemini_ai.js';
+import AnswerQuiz from '../models/answer_quiz.js';
+import AnswerExam from '../models/answer_exam.js';
+import AnswerActivity from '../models/answer_activity.js';
+
+
+
 
 
 function storeCurrentDate(expirationAmount, expirationUnit) {
@@ -206,6 +211,104 @@ export const get_all_classroom_overview_specific_instructor = asyncHandler(async
        //return res.status(200).json({ data: {classrooms, students, materials} });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all classrooms.' });
+    }
+});
+
+
+export const get_all_activities_specific_student_specific_classroom = asyncHandler(async (req, res) => {  
+    const { classroom_id, student_id } = req.params; // Get the meal ID from the request parameters
+  
+    try {
+        const classroom = await Classroom.findById(classroom_id).populate('instructor');
+        const student = await Student.findById(student_id);
+
+        if (!classroom) {
+            return res.status(404).json({ message: 'Classroom not found.' });
+        }
+
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found.' });
+        }
+
+        const exams = await Exam.find({ 
+            classroom : classroom.id,
+        });
+
+        const quizzes = await Quiz.find({ 
+            classroom : classroom.id,
+        });
+
+        const activities = await Activity.find({ 
+            classroom : classroom.id,
+        });
+
+        
+
+       const quiz_answers = await AnswerQuiz
+        .find({ student: student.id }) // filter by student ID
+        .populate({
+            path: 'quiz',
+            populate: { path: 'classroom', match: { _id: classroom.id } } // fixed syntax error
+        });
+
+
+        const exam_answers  = await AnswerExam
+        .find({ student: student.id }) // filter by student ID
+        .populate({
+            path: 'exam',
+            populate: { path: 'classroom', match: { _id: classroom.id } } // fixed syntax error
+        });
+
+        const activity_answers  = await AnswerActivity
+        .find({ student: student.id }) // filter by student ID
+        .populate({
+            path: 'activity',
+            populate: { path: 'classroom', match: { _id: classroom.id } } // fixed syntax error
+        });
+
+
+        
+        const all_quiz_answers = quiz_answers.filter(answer => 
+            answer.quiz?.classroom?._id.toString() === classroom.id.toString()
+        );
+
+        const all_exam_answers = exam_answers.filter(answer => 
+            answer.exam?.classroom?._id.toString() === classroom.id.toString()
+        );
+
+        const all_activity_answers = activity_answers.filter(answer => 
+            answer.activity?.classroom?._id.toString() === classroom.id.toString()
+        );
+        
+
+        const all_activities = [...exams, ...quizzes, ...activities];
+        const all_answers = [...all_quiz_answers, ...all_exam_answers, ...all_activity_answers];
+
+
+        const answeredIds = [...new Set(
+            all_answers.map(answer => answer.exam?.id || answer.activity?.id || answer.quiz?.id)
+        )];
+
+        const answered_activities = all_activities.filter(activity => answeredIds.includes(activity.id));
+        const unanswered_activities = all_activities.filter(activity => !answeredIds.includes(activity.id));
+        
+        const total_answered = all_activities.filter(activity => answeredIds.includes(activity.id)).length;
+        const total_unanswered = all_activities.length - total_answered;
+
+
+        const data = {
+            student: student,
+            all_activities,
+            answered_activities,
+            unanswered_activities,
+            total_activity: all_activities.length,
+            total_answered,
+            total_unanswered
+        };
+       
+        return res.status(200).json({ data: data });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to get all student activities.' });
     }
 });
 
