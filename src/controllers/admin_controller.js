@@ -28,12 +28,12 @@ function hashConverterMD5(password) {
 
 
 export const create_admin = asyncHandler(async (req, res) => {
-    const { fullname, password, email } = req.body;
+    const { first_name, middle_name, last_name, password, email } = req.body;
     
     try {
         // Check if all required fields are provided
-        if (!fullname || !email || !password) {
-            return res.status(400).json({ message: "Please provide all fields (email, password, fullname)." });
+        if (!first_name || !middle_name || !last_name || !email || !password) {
+            return res.status(400).json({ message: "Please provide all fields (email, password, first_name, middle_name, last_name)." });
         }
 
         if (await Student.findOne({ email })) return res.status(400).json({ message: 'Email already exists' });
@@ -43,7 +43,9 @@ export const create_admin = asyncHandler(async (req, res) => {
         const hash_password = hashConverterMD5(password);
    
         const newAdmin = new Admin({
-            fullname: fullname,
+            first_name: first_name,
+            middle_name: middle_name,
+            last_name: last_name,
             password: hash_password,
             email: email,
             created_at: storeCurrentDate(0, 'hours'),
@@ -115,11 +117,11 @@ export const get_specific_admin = asyncHandler(async (req, res) => {
 
 export const update_admin = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { email, fullname } = req.body;
+    const { email, first_name, middle_name, last_name } = req.body;
 
     try {
-        if (!email || !fullname) {
-            return res.status(400).json({ message: "All fields are required: email and fullname." });
+        if (!email || !first_name || !middle_name || !last_name) {
+            return res.status(400).json({ message: "All fields are required: email, first_name, middle_name, last_name." });
         }
 
         const updatedAdmin = await Admin.findById(id);
@@ -132,14 +134,18 @@ export const update_admin = asyncHandler(async (req, res) => {
 
         if(updatedAdmin) {
             updatedAdmin.email = email ? email : updatedAdmin.email;
-            updatedAdmin.fullname = fullname ? fullname : updatedAdmin.fullname;
+            updatedAdmin.first_name = first_name ? first_name : updatedAdmin.first_name;
+            updatedAdmin.middle_name = middle_name ? middle_name : updatedAdmin.middle_name;
+            updatedAdmin.last_name = last_name ? last_name : updatedAdmin.last_name;
                     
             await updatedAdmin.save();
         }
 
         if(updatedInstructorAdmin) {
             updatedInstructorAdmin.email = email ? email : updatedInstructorAdmin.email;
-            updatedInstructorAdmin.fullname = fullname ? fullname : updatedInstructorAdmin.fullname;
+            updatedInstructorAdmin.first_name = first_name ? first_name : updatedInstructorAdmin.first_name;
+            updatedInstructorAdmin.middle_name = middle_name ? middle_name : updatedInstructorAdmin.middle_name;
+            updatedInstructorAdmin.last_name = last_name ? last_name : updatedInstructorAdmin.last_name;
                     
             await updatedInstructorAdmin.save();
         }

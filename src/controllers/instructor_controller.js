@@ -31,12 +31,12 @@ function hashConverterMD5(password) {
 
 
 export const create_instructor = asyncHandler(async (req, res) => {
-    const { fullname, password, email } = req.body;
+    const { first_name, middle_name, last_name, password, email } = req.body;
     
     try {
         // Check if all required fields are provided
-        if (!fullname || !email || !password) {
-            return res.status(400).json({ message: "Please provide all fields (email, password, fullname)." });
+        if (!first_name || !middle_name || !last_name || !email || !password) {
+            return res.status(400).json({ message: "Please provide all fields (first_name, middle_name, last_name, email, password, fullname)." });
         }
         
         if (await Student.findOne({ email })) return res.status(400).json({ message: 'Email already exists' });
@@ -44,9 +44,13 @@ export const create_instructor = asyncHandler(async (req, res) => {
         if (await Instructor.findOne({ email })) return res.status(400).json({ message: 'Email already exists' });
 
         const hash_password = hashConverterMD5(password);
+
+
    
         const newInstructor = new Instructor({
-            fullname: fullname,
+            first_name: first_name,
+            middle_name: middle_name,
+            last_name: last_name,
             password: hash_password,
             email: email,
             created_at: storeCurrentDate(0, 'hours'),
@@ -113,15 +117,15 @@ export const get_specific_instructor = asyncHandler(async (req, res) => {
 // });
 
 
-
+       
 
 export const update_instructor = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { email, fullname } = req.body;
+    const { email, first_name, middle_name, last_name } = req.body;
 
     try {
-        if (!email || !fullname) {
-            return res.status(400).json({ message: "All fields are required: email and fullname." });
+        if (!email || !first_name || !middle_name || !last_name) {
+            return res.status(400).json({ message: "All fields are required: email, first_name, middle_name, last_name." });
         }
 
         const updatedInstructor = await Instructor.findById(id);
@@ -136,8 +140,10 @@ export const update_instructor = asyncHandler(async (req, res) => {
 
         if(updatedInstructor) {
             updatedInstructor.email = email ? email : updatedInstructor.email;
-            updatedInstructor.fullname = fullname ? fullname : updatedInstructor.fullname;
-                            
+            updatedInstructor.first_name = first_name ? first_name : updatedInstructor.first_name;
+            updatedInstructor.middle_name = middle_name ? middle_name : updatedInstructor.middle_name;
+            updatedInstructor.last_name = last_name ? last_name : updatedInstructor.last_name;
+
             await updatedInstructor.save();
         }
 
@@ -150,7 +156,9 @@ export const update_instructor = asyncHandler(async (req, res) => {
 
         if(updatedStudentInstructor) {
             updatedStudentInstructor.email = email ? email : updatedStudentInstructor.email;
-            updatedStudentInstructor.fullname = fullname ? fullname : updatedStudentInstructor.fullname;
+            updatedStudentInstructor.first_name = first_name ? first_name : updatedStudentInstructor.first_name;
+            updatedStudentInstructor.middle_name = middle_name ? middle_name : updatedStudentInstructor.middle_name;
+            updatedStudentInstructor.last_name = last_name ? last_name : updatedStudentInstructor.last_name;
                             
             await updatedStudentInstructor.save();
         }

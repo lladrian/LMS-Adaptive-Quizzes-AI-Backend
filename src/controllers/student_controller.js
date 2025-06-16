@@ -28,12 +28,12 @@ function hashConverterMD5(password) {
 
 
 export const create_student = asyncHandler(async (req, res) => {
-    const { fullname, password, email, student_id_number } = req.body;
+    const { first_name, middle_name, last_name, password, email, student_id_number } = req.body;
     
     try {
         // Check if all required fields are provided
-        if (!fullname || !email || !password || !student_id_number) {
-            return res.status(400).json({ message: "Please provide all fields (email, password, fullname, student_id_number)." });
+        if (!first_name || !middle_name || !last_name || !email || !password || !student_id_number) {
+            return res.status(400).json({ message: "Please provide all fields (email, password, first_name, middle_name, last_name, student_id_number)." });
         }
 
 
@@ -45,7 +45,9 @@ export const create_student = asyncHandler(async (req, res) => {
         const hash_password = hashConverterMD5(password);
    
         const newStudent = new Student({
-            fullname: fullname,
+            first_name: first_name,
+            middle_name: middle_name,
+            last_name: last_name,
             password: hash_password,
             email: email,
             student_id_number: student_id_number,
@@ -114,11 +116,11 @@ export const get_specific_student = asyncHandler(async (req, res) => {
 
 export const update_student = asyncHandler(async (req, res) => {    
     const { id } = req.params; // Get the meal ID from the request parameters
-    const { email, fullname, student_id_number } = req.body;
+    const { email, student_id_number, first_name, middle_name, last_name } = req.body;
 
     try {
-        if (!email || !fullname || !student_id_number) {
-            return res.status(400).json({ message: "All fields are required: email, student_id_number and fullname." });
+        if (!email || !student_id_number || !first_name || !middle_name || !last_name) {
+            return res.status(400).json({ message: "All fields are required: email, student_id_number, first_name, middle_name, last_name." });
         }
 
         const updatedStudent = await Student.findById(id);
@@ -128,7 +130,9 @@ export const update_student = asyncHandler(async (req, res) => {
         }
                         
         updatedStudent.email = email ? email : updatedStudent.email;
-        updatedStudent.fullname = fullname ? fullname : updatedStudent.fullname;
+        updatedStudent.first_name = first_name ? first_name : updatedStudent.first_name;
+        updatedStudent.middle_name = middle_name ? middle_name : updatedStudent.middle_name;
+        updatedStudent.last_name = last_name ? last_name : updatedStudent.last_name;
         updatedStudent.student_id_number = student_id_number ? student_id_number : updatedStudent.student_id_number;
                                 
         await updatedStudent.save();

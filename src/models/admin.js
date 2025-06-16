@@ -3,8 +3,20 @@ import mongoose from "mongoose";
 const AdminSchema = new mongoose.Schema({
   fullname: {
     type: String,
-    required: true
+    default: "Default Name"
   }, 
+  first_name: {
+      type: String,
+      required: true
+  },
+  middle_name: {
+      type: String,
+      required: true
+  },
+  last_name: {
+      type: String,
+      required: true
+  },
   password: { 
     type: String, 
     required: true,

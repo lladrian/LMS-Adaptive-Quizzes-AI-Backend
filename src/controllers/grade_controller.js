@@ -261,12 +261,7 @@ export const get_all_Student_grade_specific_classroom = asyncHandler(async (req,
           classroom: {
             grading_system: classroom.grading_system
           },
-          student: {
-            _id: student._id,
-            fullname: student.fullname,
-            email: student.email,
-            status: student.status,
-          },
+          student: student,
           grades: {
             quiz: {
               totalPoints: totalQuizPoints,
