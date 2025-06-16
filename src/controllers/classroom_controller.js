@@ -284,16 +284,30 @@ export const get_all_activities_specific_student_specific_classroom = asyncHandl
         const all_activities = [...exams, ...quizzes, ...activities];
         const all_answers = [...all_quiz_answers, ...all_exam_answers, ...all_activity_answers];
 
-
         const answeredIds = [...new Set(
             all_answers.map(answer => answer.exam?.id || answer.activity?.id || answer.quiz?.id)
         )];
 
-        const answered_activities = all_activities.filter(activity => answeredIds.includes(activity.id));
-        const unanswered_activities = all_activities.filter(activity => !answeredIds.includes(activity.id));
-        
-        const total_answered = all_activities.filter(activity => answeredIds.includes(activity.id)).length;
-        const total_unanswered = all_activities.length - total_answered;
+
+        const answered_activities = all_activities
+        .filter(activity => answeredIds.includes(activity.id))
+        .map(activity => {
+            const matchedAnswer = all_answers.find(answer => {
+            const answerId = answer.exam?.id || answer.activity?.id || answer.quiz?.id;
+            return activity.id === answerId; // just return true or false
+            });
+            return {
+            activity: activity,
+            answer: matchedAnswer,
+            };
+        });
+
+        const unanswered_activities = all_activities
+        .filter(activity => !answeredIds.includes(activity.id))
+        .map(activity => ({
+            activity: activity || [],
+            answer: null,
+        }));
 
 
         const data = {
@@ -302,7 +316,7 @@ export const get_all_activities_specific_student_specific_classroom = asyncHandl
             answered_activities,
             unanswered_activities
         };
-       
+        
         return res.status(200).json({ data: data });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all student activities.' });
