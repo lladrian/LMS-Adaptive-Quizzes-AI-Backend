@@ -72,6 +72,7 @@ export const get_all_student_missing_answer_specific_activity = asyncHandler(asy
   
     try {
         const activity = await Activity.findById(activity_id).populate('classroom');
+        
 
         if (!activity) {
             return res.status(404).json({ message: 'Activity not found.' });
@@ -80,12 +81,13 @@ export const get_all_student_missing_answer_specific_activity = asyncHandler(asy
         const answers = await AnswerActivity.find({ activity: activity.id, submitted_at: { $ne: null } }).populate('student');
         const answeredStudentIds = answers.map(ans => ans.student._id);
   
-        const students = await Student.find({
+        const students_missing = await Student.find({
         role: 'student',
-        _id: { $nin: answeredStudentIds }
+        _id: { $nin: answeredStudentIds },
+        joined_classroom: activity.classroom.id, // or mongoose.Types.ObjectId(classroom.id) if needed
         });
 
-        return res.status(200).json({ data: students });
+        return res.status(200).json({ data: students_missing });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to get all students have missing activity.' });
     }
