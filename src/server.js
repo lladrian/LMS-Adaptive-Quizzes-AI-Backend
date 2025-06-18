@@ -1,8 +1,7 @@
-import express from 'express';
-import dotenv from 'dotenv';
+import express from "express";
+import dotenv from "dotenv";
 import connectDB from "./config/db.js";
-import cors from 'cors';
-
+import cors from "cors";
 
 import adminRoutes from "./routes/admin_routes.js";
 import instructorRoutes from "./routes/instructor_routes.js";
@@ -23,19 +22,16 @@ import promoteRoutes from "./routes/promote_routes.js";
 import gradeRoutes from "./routes/grade_routes.js";
 import answerActivityRoutes from "./routes/answer_activity_routes.js";
 import activityRoutes from "./routes/activity_routes.js";
+import assignmentRoutes from "./routes/assignment_routes.js";
+import answerAssignmentRoutes from "./routes/answer_assignment_routes.js";
 
 
-
-
-
-
-import path from 'path'; // Import the path module
-import fs from 'fs'; // Import fs to check if the directory exists
-import { fileURLToPath } from 'url'; // Import fileURLToPath
-import { dirname, join } from 'path'; // Import dirname
+import path from "path"; // Import the path module
+import fs from "fs"; // Import fs to check if the directory exists
+import { fileURLToPath } from "url"; // Import fileURLToPath
+import { dirname, join } from "path"; // Import dirname
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
 
 dotenv.config();
 const app = express();
@@ -44,13 +40,11 @@ const port = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use((req, res, next) => {
   req.setTimeout(2 * 60 * 1000); // 2 minutes
   next();
 });
-
-
 
 app.use("/admins", adminRoutes);
 app.use("/instructors", instructorRoutes);
@@ -71,16 +65,14 @@ app.use("/promotes", promoteRoutes);
 app.use("/grades", gradeRoutes);
 app.use("/answer_activities", answerActivityRoutes);
 app.use("/activities", activityRoutes);
-
-
-
+app.use("/assignments", assignmentRoutes);
+app.use("/answer_assignments", answerAssignmentRoutes);
 
 connectDB();
 
 // Start the server
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on http://localhost:${port}`);
 });
 
 export default app;
-
