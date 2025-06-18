@@ -25,7 +25,6 @@ import activityRoutes from "./routes/activity_routes.js";
 import assignmentRoutes from "./routes/assignment_routes.js";
 import answerAssignmentRoutes from "./routes/answer_assignment_routes.js";
 
-
 import path from "path"; // Import the path module
 import fs from "fs"; // Import fs to check if the directory exists
 import { fileURLToPath } from "url"; // Import fileURLToPath

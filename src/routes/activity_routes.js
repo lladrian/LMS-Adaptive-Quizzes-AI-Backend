@@ -2,7 +2,7 @@ import { Router } from "express";
 import * as ActivityController from '../controllers/activity_controller.js'; // Import the controller
 
 const activityRoutes = Router();
-
+  
   
 activityRoutes.post('/add_activity', ActivityController.create_activity);
 activityRoutes.get('/get_specific_activity_specific_answer/:activity_id/:student_id', ActivityController.get_specific_activity_specific_answer);
