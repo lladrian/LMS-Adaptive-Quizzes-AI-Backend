@@ -16,13 +16,24 @@ const ActivitySchema = new mongoose.Schema({
         type: String,
         required: false,
       },
+      options: {
+        option_1: { type: String, required: false },
+        option_2: { type: String, required: false },
+        option_3: { type: String, required: false },
+        option_4: { type: String, required: false },
+      },
+      correct_option: {
+        type: String,
+        required: false,
+      },
       points: {
         type: Number,
         required: false,
       },
       answer_type: {
         type: String,
-        default: "programming",
+        enum: ["programming", "options"],
+        required: true,
       },
     },
   ],

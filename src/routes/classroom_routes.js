@@ -19,4 +19,7 @@ classroomRoutes.put('/update_classroom/:id', ClassroomController.update_classroo
 classroomRoutes.get('/hide_classroom/:id', ClassroomController.hide_classroom);
 classroomRoutes.get('/unhide_classroom/:id', ClassroomController.unhide_classroom);
 
+classroomRoutes.put('/restrict_sections/:id', ClassroomController.restrict_sections);
+
+
 export default classroomRoutes;

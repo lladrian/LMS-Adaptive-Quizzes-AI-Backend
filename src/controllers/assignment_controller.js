@@ -24,12 +24,10 @@ export const create_assignment_option = asyncHandler(async (req, res) => {
     !title ||
     !description
   ) {
-    return res
-      .status(400)
-      .json({
-        message:
-          "Please provide all fields (classroom_id, question_option, time_limit, title, description).",
-      });
+    return res.status(400).json({
+      message:
+        "Please provide all fields (classroom_id, question_option, time_limit, title, description).",
+    });
   }
 
   const newAssignment = new Assignment({
@@ -51,12 +49,10 @@ export const create_assignment = asyncHandler(async (req, res) => {
   const { classroom_id, question, time_limit, title, description } = req.body;
 
   if (!classroom_id || !question || !time_limit || !title || !description) {
-    return res
-      .status(400)
-      .json({
-        message:
-          "Please provide all fields (classroom_id, question, time_limit, title, description).",
-      });
+    return res.status(400).json({
+      message:
+        "Please provide all fields (classroom_id, question, time_limit, title, description).",
+    });
   }
 
   const newAssignment = new Assignment({
@@ -88,11 +84,9 @@ export const get_all_assignment_specific_classroom = asyncHandler(
       const assignments = await Assignment.find({ classroom: classroom.id });
       return res.status(200).json({ data: assignments });
     } catch (error) {
-      return res
-        .status(500)
-        .json({
-          error: "Failed to get all assignments in specific classroom.",
-        });
+      return res.status(500).json({
+        error: "Failed to get all assignments in specific classroom.",
+      });
     }
   }
 );
@@ -149,12 +143,10 @@ export const update_assignment_option = asyncHandler(async (req, res) => {
     req.body;
 
   if (!classroom_id || !question_option || !title || !description) {
-    return res
-      .status(400)
-      .json({
-        message:
-          "Please provide all fields (classroom_id, question_option, title, description).",
-      });
+    return res.status(400).json({
+      message:
+        "Please provide all fields (classroom_id, question_option, title, description).",
+    });
   }
 
   const updatedAssignment = await Assignment.findById(id);
@@ -178,12 +170,10 @@ export const update_assignment = asyncHandler(async (req, res) => {
   const { classroom_id, question, time_limit, title, description } = req.body;
 
   if (!classroom_id || !question || !title || !description) {
-    return res
-      .status(400)
-      .json({
-        message:
-          "Please provide all fields (classroom_id, question, title, description).",
-      });
+    return res.status(400).json({
+      message:
+        "Please provide all fields (classroom_id, question, title, description).",
+    });
   }
 
   const updatedAssignment = await Assignment.findById(id);
