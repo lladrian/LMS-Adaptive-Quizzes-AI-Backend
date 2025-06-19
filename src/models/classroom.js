@@ -1,4 +1,3 @@
-// models/classroom.js
 import mongoose from "mongoose";
 
 const GradingSchema = new mongoose.Schema({
@@ -58,7 +57,15 @@ const ClassroomSchema = new mongoose.Schema({
   restricted_sections: {
     type: [String],
     default: [],
-    enum: ["lessons", "assignments", "grades", "practice"], // Optional validation
+    enum: [
+      "lessons",
+      "assignments",
+      "grades",
+      "practice",
+      "students",
+      "materials",
+      "activities",
+    ],
   },
   created_at: {
     type: String,

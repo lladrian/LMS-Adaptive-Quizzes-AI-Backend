@@ -450,8 +450,7 @@ export const get_specific_classroom = asyncHandler(async (req, res) => {
 
 export const get_all_classroom = asyncHandler(async (req, res) => {
   try {
-    const classrooms = await Classroom.find();
-
+    const classrooms = await Classroom.find().populate("instructor");
     return res.status(200).json({ data: classrooms });
   } catch (error) {
     return res.status(500).json({ error: "Failed to get all classrooms." });
@@ -513,7 +512,6 @@ export const get_all_classroom_specific_instructor = asyncHandler(
   }
 );
 
-// controllers/classroom_controller.js
 export const update_classroom = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const {
@@ -563,10 +561,9 @@ export const update_classroom = asyncHandler(async (req, res) => {
   }
 });
 
-// controllers/classroom_controller.js
 export const restrict_sections = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { sections } = req.body; // Destructure sections from body
+  const { sections } = req.body;
 
   try {
     const classroom = await Classroom.findById(id);
@@ -575,8 +572,15 @@ export const restrict_sections = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: "Classroom not found" });
     }
 
-    // Validate sections
-    const validSections = ["lessons", "assignments", "grades", "practice"];
+    const validSections = [
+      "lessons",
+      "assignments",
+      "grades",
+      "practice",
+      "students",
+      "materials",
+      "activities",
+    ];
     const invalidSections = sections.filter((s) => !validSections.includes(s));
 
     if (invalidSections.length > 0) {
@@ -586,7 +590,6 @@ export const restrict_sections = asyncHandler(async (req, res) => {
       });
     }
 
-    // Ensure sections is an array and contains only unique values
     const uniqueSections = [...new Set(sections)];
 
     classroom.restricted_sections = uniqueSections;
