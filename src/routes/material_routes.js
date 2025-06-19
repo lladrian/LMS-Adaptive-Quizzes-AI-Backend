@@ -42,5 +42,7 @@ materialRoutes.get('/get_all_material_specific_classroom/:classroom_id', Materia
 materialRoutes.get('/get_specific_material/:material_id', MaterialController.get_specific_material);
 materialRoutes.put('/update_material/:id', upload.single('file_uploaded'), MaterialController.update_material);
 materialRoutes.delete('/delete_material/:id', MaterialController.delete_material);
+materialRoutes.get('/get_all_materials', MaterialController.get_all_materials);
+
 
 export default materialRoutes;

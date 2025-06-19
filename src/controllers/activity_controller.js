@@ -86,7 +86,7 @@ export const create_activity = asyncHandler(async (req, res) => {
 
     await newActivity.save();
 
-    return res.status(200).json({ data: "New activity successfully created." });
+    return res.status(200).json({ data: newActivity });
   } catch (error) {
     return res.status(500).json({ error: "Failed to create activity." });
   }

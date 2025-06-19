@@ -65,9 +65,7 @@ export const create_assignment = asyncHandler(async (req, res) => {
   });
 
   await newAssignment.save();
-  return res
-    .status(200)
-    .json({ message: "New assignment successfully created." });
+  return res.status(200).json({ data: newAssignment });
 });
 
 export const get_all_assignment_specific_classroom = asyncHandler(
