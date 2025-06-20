@@ -3,19 +3,23 @@ import mongoose from "mongoose";
 const GradingSchema = new mongoose.Schema({
   quiz: {
     type: Number,
-    default: 20,
+    default: 15,
   },
   midterm: {
     type: Number,
-    default: 30,
+    default: 25,
   },
   final: {
     type: Number,
-    default: 30,
+    default: 25,
   },
   activity: {
     type: Number,
     default: 20,
+  },
+  assignment: {
+    type: Number,
+    default: 15,
   },
 });
 
