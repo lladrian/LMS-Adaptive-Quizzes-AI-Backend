@@ -24,6 +24,7 @@ import answerActivityRoutes from "./routes/answer_activity_routes.js";
 import activityRoutes from "./routes/activity_routes.js";
 import assignmentRoutes from "./routes/assignment_routes.js";
 import answerAssignmentRoutes from "./routes/answer_assignment_routes.js";
+import extendRoutes from "./routes/extends_routes.js";
 
 import path from "path"; // Import the path module
 import fs from "fs"; // Import fs to check if the directory exists
@@ -66,7 +67,7 @@ app.use("/answer_activities", answerActivityRoutes);
 app.use("/activities", activityRoutes);
 app.use("/assignments", assignmentRoutes);
 app.use("/answer_assignments", answerAssignmentRoutes);
-
+app.use("/extends", extendRoutes);
 connectDB();
 
 // Start the server

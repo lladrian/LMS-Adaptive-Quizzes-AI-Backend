@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const ActivitySchema = new mongoose.Schema({
   classroom: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Classroom", // reference to the Instructor model
+    ref: "Classroom",
     required: true,
   },
   question: [
@@ -56,6 +56,10 @@ const ActivitySchema = new mongoose.Schema({
   submission_time: {
     type: Number,
     required: true,
+  },
+  extended_minutes: {
+    type: Number,
+    default: 0, // Default to 0 minutes (no extension)
   },
   created_at: {
     type: String,

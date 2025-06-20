@@ -57,6 +57,10 @@ const AssignmentSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  extended_minutes: {
+    type: Number,
+    default: 0, // Default to 0 minutes (no extension)
+  },
   created_at: {
     type: String,
     default: null,
