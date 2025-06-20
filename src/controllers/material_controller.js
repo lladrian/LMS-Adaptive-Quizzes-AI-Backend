@@ -11,6 +11,7 @@ import path from "path";
 import fs from "fs"; // Import fs to check if the directory exists
 import { fileURLToPath } from "url"; // Import fileURLToPath
 import { dirname, join } from "path"; // Import dirname
+import Classroom from "../models/classroom.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const uploadsDir = path.join(__dirname, "../../uploads/");
