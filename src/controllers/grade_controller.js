@@ -4,11 +4,11 @@ import dotenv from "dotenv";
 import AnswerQuiz from "../models/answer_quiz.js";
 import AnswerExam from "../models/answer_exam.js";
 import AnswerActivity from "../models/answer_activity.js";
-import AnswerAssignment from "../models/answer_assignment.js"; // Add this import
+import AnswerAssignment from "../models/answer_assignment.js";
 import Activity from "../models/activity.js";
 import Quiz from "../models/quiz.js";
 import Exam from "../models/exam.js";
-import Assignment from "../models/assignment.js"; // Add this import
+import Assignment from "../models/assignment.js";
 import Student from "../models/student.js";
 import Classroom from "../models/classroom.js";
 
@@ -39,7 +39,7 @@ export const compute_grade = asyncHandler(async (req, res) => {
       Quiz.find({ classroom: classroom_id }),
       Exam.find({ classroom: classroom_id }),
       Activity.find({ classroom: classroom_id }),
-      Assignment.find({ classroom: classroom_id }), // Add assignments query
+      Assignment.find({ classroom: classroom_id }),
     ]);
 
     const activityWithAnswers = await Promise.all(
@@ -86,6 +86,7 @@ export const compute_grade = asyncHandler(async (req, res) => {
           answer,
           totalPoints,
           earnedPoints,
+          grading_breakdown: exam.grading_breakdown,
         };
       })
     );
@@ -113,7 +114,6 @@ export const compute_grade = asyncHandler(async (req, res) => {
       })
     );
 
-    // Add assignments with answers
     const assignmentsWithAnswers = await Promise.all(
       assignments.map(async (assignment) => {
         const answer = await AnswerAssignment.findOne({
@@ -138,120 +138,245 @@ export const compute_grade = asyncHandler(async (req, res) => {
       })
     );
 
-    // Calculate totals for each type
-    const totalAllPointsQuiz = quizzesWithAnswers.reduce(
+    // Calculate totals for each type and term
+    // Midterm calculations
+    const midtermQuizzes = quizzesWithAnswers.filter(
+      (quiz) => quiz.quiz.grading_breakdown === "midterm"
+    );
+    const midtermActivities = activityWithAnswers.filter(
+      (activity) => activity.activity.grading_breakdown === "midterm"
+    );
+    const midtermAssignments = assignmentsWithAnswers.filter(
+      (assignment) => assignment.assignment.grading_breakdown === "midterm"
+    );
+    const midtermExams = examsWithAnswers.filter(
+      (exam) => exam.grading_breakdown === "midterm"
+    );
+
+    const totalMidtermQuizPoints = midtermQuizzes.reduce(
       (sum, item) => sum + item.totalPoints,
       0
     );
-    const totalAllEarnedQuiz = quizzesWithAnswers.reduce(
+    const totalMidtermEarnedQuiz = midtermQuizzes.reduce(
       (sum, item) => sum + item.earnedPoints,
       0
     );
 
-    const totalAllPointsActivity = activityWithAnswers.reduce(
+    const totalMidtermActivityPoints = midtermActivities.reduce(
       (sum, item) => sum + item.totalPoints,
       0
     );
-    const totalAllEarnedActivity = activityWithAnswers.reduce(
+    const totalMidtermEarnedActivity = midtermActivities.reduce(
       (sum, item) => sum + item.earnedPoints,
       0
     );
 
-    const totalAllPointsAssignment = assignmentsWithAnswers.reduce(
+    const totalMidtermAssignmentPoints = midtermAssignments.reduce(
       (sum, item) => sum + item.totalPoints,
       0
     );
-    const totalAllEarnedAssignment = assignmentsWithAnswers.reduce(
+    const totalMidtermEarnedAssignment = midtermAssignments.reduce(
       (sum, item) => sum + item.earnedPoints,
       0
     );
 
-    const totalFinalPointsExam = examsWithAnswers
-      .filter((item) => item.exam.grading_breakdown === "final")
-      .reduce((sum, item) => sum + item.totalPoints, 0);
+    const totalMidtermExamPoints = midtermExams.reduce(
+      (sum, item) => sum + item.totalPoints,
+      0
+    );
+    const totalMidtermEarnedExam = midtermExams.reduce(
+      (sum, item) => sum + item.earnedPoints,
+      0
+    );
 
-    const totalFinalEarnedExam = examsWithAnswers
-      .filter((item) => item.exam.grading_breakdown === "final")
-      .reduce((sum, item) => sum + item.earnedPoints, 0);
+    // Final calculations
+    const finalQuizzes = quizzesWithAnswers.filter(
+      (quiz) => quiz.quiz.grading_breakdown === "final"
+    );
+    const finalActivities = activityWithAnswers.filter(
+      (activity) => activity.activity.grading_breakdown === "final"
+    );
+    const finalAssignments = assignmentsWithAnswers.filter(
+      (assignment) => assignment.assignment.grading_breakdown === "final"
+    );
+    const finalExams = examsWithAnswers.filter(
+      (exam) => exam.grading_breakdown === "final"
+    );
 
-    const totalMidtermPointsExam = examsWithAnswers
-      .filter((item) => item.exam.grading_breakdown === "midterm")
-      .reduce((sum, item) => sum + item.totalPoints, 0);
+    const totalFinalQuizPoints = finalQuizzes.reduce(
+      (sum, item) => sum + item.totalPoints,
+      0
+    );
+    const totalFinalEarnedQuiz = finalQuizzes.reduce(
+      (sum, item) => sum + item.earnedPoints,
+      0
+    );
 
-    const totalMidtermEarnedExam = examsWithAnswers
-      .filter((item) => item.exam.grading_breakdown === "midterm")
-      .reduce((sum, item) => sum + item.earnedPoints, 0);
+    const totalFinalActivityPoints = finalActivities.reduce(
+      (sum, item) => sum + item.totalPoints,
+      0
+    );
+    const totalFinalEarnedActivity = finalActivities.reduce(
+      (sum, item) => sum + item.earnedPoints,
+      0
+    );
 
-    // Calculate grades
-    const quiz_grade =
-      parseFloat(
-        (
-          (totalAllEarnedQuiz / totalAllPointsQuiz) *
-          classroom.grading_system.quiz
-        ).toFixed(1)
-      ) || 0;
-    const midterm_grade =
-      parseFloat(
-        (
-          (totalMidtermEarnedExam / totalMidtermPointsExam) *
-          classroom.grading_system.midterm
-        ).toFixed(1)
-      ) || 0;
-    const final_grade =
-      parseFloat(
-        (
-          (totalFinalEarnedExam / totalFinalPointsExam) *
-          classroom.grading_system.final
-        ).toFixed(1)
-      ) || 0;
-    const activity_grade =
-      parseFloat(
-        (
-          (totalAllEarnedActivity / totalAllPointsActivity) *
-          classroom.grading_system.activity
-        ).toFixed(1)
-      ) || 0;
-    const assignment_grade =
-      parseFloat(
-        (
-          (totalAllEarnedAssignment / totalAllPointsAssignment) *
-          classroom.grading_system.assignment
-        ).toFixed(1)
-      ) || 0;
+    const totalFinalAssignmentPoints = finalAssignments.reduce(
+      (sum, item) => sum + item.totalPoints,
+      0
+    );
+    const totalFinalEarnedAssignment = finalAssignments.reduce(
+      (sum, item) => sum + item.earnedPoints,
+      0
+    );
+
+    const totalFinalExamPoints = finalExams.reduce(
+      (sum, item) => sum + item.totalPoints,
+      0
+    );
+    const totalFinalEarnedExam = finalExams.reduce(
+      (sum, item) => sum + item.earnedPoints,
+      0
+    );
+
+    // Calculate grades for each term
+    const midtermQuizGrade =
+      totalMidtermQuizPoints > 0
+        ? parseFloat(
+            (totalMidtermEarnedQuiz / totalMidtermQuizPoints) *
+              classroom.grading_system.midterm.quiz
+          ).toFixed(1)
+        : 0;
+
+    const midtermActivityGrade =
+      totalMidtermActivityPoints > 0
+        ? parseFloat(
+            (totalMidtermEarnedActivity / totalMidtermActivityPoints) *
+              classroom.grading_system.midterm.activity
+          ).toFixed(1)
+        : 0;
+
+    const midtermAssignmentGrade =
+      totalMidtermAssignmentPoints > 0
+        ? parseFloat(
+            (totalMidtermEarnedAssignment / totalMidtermAssignmentPoints) *
+              classroom.grading_system.midterm.assignment
+          ).toFixed(1)
+        : 0;
+
+    const midtermExamGrade =
+      totalMidtermExamPoints > 0
+        ? parseFloat(
+            (totalMidtermEarnedExam / totalMidtermExamPoints) *
+              classroom.grading_system.midterm.exam
+          ).toFixed(1)
+        : 0;
+
+    const finalQuizGrade =
+      totalFinalQuizPoints > 0
+        ? parseFloat(
+            (totalFinalEarnedQuiz / totalFinalQuizPoints) *
+              classroom.grading_system.final.quiz
+          ).toFixed(1)
+        : 0;
+
+    const finalActivityGrade =
+      totalFinalActivityPoints > 0
+        ? parseFloat(
+            (totalFinalEarnedActivity / totalFinalActivityPoints) *
+              classroom.grading_system.final.activity
+          ).toFixed(1)
+        : 0;
+
+    const finalAssignmentGrade =
+      totalFinalAssignmentPoints > 0
+        ? parseFloat(
+            (totalFinalEarnedAssignment / totalFinalAssignmentPoints) *
+              classroom.grading_system.final.assignment
+          ).toFixed(1)
+        : 0;
+
+    const finalExamGrade =
+      totalFinalExamPoints > 0
+        ? parseFloat(
+            (totalFinalEarnedExam / totalFinalExamPoints) *
+              classroom.grading_system.final.exam
+          ).toFixed(1)
+        : 0;
+
+    // Calculate term grades
+    const midtermGrade = parseFloat(
+      (
+        parseFloat(midtermQuizGrade) +
+        parseFloat(midtermActivityGrade) +
+        parseFloat(midtermAssignmentGrade) +
+        parseFloat(midtermExamGrade)
+      ).toFixed(1)
+    );
+
+    const finalGrade = parseFloat(
+      (
+        parseFloat(finalQuizGrade) +
+        parseFloat(finalActivityGrade) +
+        parseFloat(finalAssignmentGrade) +
+        parseFloat(finalExamGrade)
+      ).toFixed(1)
+    );
+
+    // Calculate overall grade (average of midterm and final)
+    const overallGrade = parseFloat(
+      ((parseFloat(midtermGrade) + parseFloat(finalGrade)) / 2).toFixed(1)
+    );
 
     const data = {
-      quiz: {
-        totalPoints: totalAllPointsQuiz,
-        earnedPoints: totalAllEarnedQuiz,
-        quiz: quiz_grade,
-      },
       midterm: {
-        totalPoints: totalMidtermPointsExam,
-        earnedPoints: totalMidtermEarnedExam,
-        midterm: midterm_grade,
+        quiz: {
+          totalPoints: totalMidtermQuizPoints,
+          earnedPoints: totalMidtermEarnedQuiz,
+          grade: parseFloat(midtermQuizGrade),
+        },
+        activity: {
+          totalPoints: totalMidtermActivityPoints,
+          earnedPoints: totalMidtermEarnedActivity,
+          grade: parseFloat(midtermActivityGrade),
+        },
+        assignment: {
+          totalPoints: totalMidtermAssignmentPoints,
+          earnedPoints: totalMidtermEarnedAssignment,
+          grade: parseFloat(midtermAssignmentGrade),
+        },
+        exam: {
+          totalPoints: totalMidtermExamPoints,
+          earnedPoints: totalMidtermEarnedExam,
+          grade: parseFloat(midtermExamGrade),
+        },
+        term_grade: parseFloat(midtermGrade),
       },
       final: {
-        totalPoints: totalFinalPointsExam,
-        earnedPoints: totalFinalEarnedExam,
-        final: final_grade,
-      },
-      activity: {
-        totalPoints: totalAllPointsActivity,
-        earnedPoints: totalAllEarnedActivity,
-        activity: activity_grade,
-      },
-      assignment: {
-        totalPoints: totalAllPointsAssignment,
-        earnedPoints: totalAllEarnedAssignment,
-        assignment: assignment_grade,
+        quiz: {
+          totalPoints: totalFinalQuizPoints,
+          earnedPoints: totalFinalEarnedQuiz,
+          grade: parseFloat(finalQuizGrade),
+        },
+        activity: {
+          totalPoints: totalFinalActivityPoints,
+          earnedPoints: totalFinalEarnedActivity,
+          grade: parseFloat(finalActivityGrade),
+        },
+        assignment: {
+          totalPoints: totalFinalAssignmentPoints,
+          earnedPoints: totalFinalEarnedAssignment,
+          grade: parseFloat(finalAssignmentGrade),
+        },
+        exam: {
+          totalPoints: totalFinalExamPoints,
+          earnedPoints: totalFinalEarnedExam,
+          grade: parseFloat(finalExamGrade),
+        },
+        term_grade: parseFloat(finalGrade),
       },
       student_grade: {
-        grade:
-          quiz_grade +
-          activity_grade +
-          midterm_grade +
-          final_grade +
-          assignment_grade,
+        grade: parseFloat(overallGrade),
       },
     };
 
@@ -281,7 +406,7 @@ export const get_all_Student_grade_specific_classroom = asyncHandler(
         Quiz.find({ classroom: classroom_id }),
         Exam.find({ classroom: classroom_id }),
         Activity.find({ classroom: classroom_id }),
-        Assignment.find({ classroom: classroom_id }), // Add assignments query
+        Assignment.find({ classroom: classroom_id }),
       ]);
 
       const results = await Promise.all(
@@ -302,7 +427,12 @@ export const get_all_Student_grade_specific_classroom = asyncHandler(
               const earnedPoints =
                 answer?.answers?.reduce((sum, a) => sum + (a.points || 0), 0) ||
                 0;
-              return { totalPoints, earnedPoints };
+              return {
+                activity,
+                totalPoints,
+                earnedPoints,
+                grading_breakdown: activity.grading_breakdown,
+              };
             })
           );
 
@@ -318,7 +448,12 @@ export const get_all_Student_grade_specific_classroom = asyncHandler(
               const earnedPoints =
                 answer?.answers?.reduce((sum, a) => sum + (a.points || 0), 0) ||
                 0;
-              return { totalPoints, earnedPoints };
+              return {
+                quiz,
+                totalPoints,
+                earnedPoints,
+                grading_breakdown: quiz.grading_breakdown,
+              };
             })
           );
 
@@ -335,6 +470,7 @@ export const get_all_Student_grade_specific_classroom = asyncHandler(
                 answer?.answers?.reduce((sum, a) => sum + (a.points || 0), 0) ||
                 0;
               return {
+                exam,
                 grading_breakdown: exam.grading_breakdown,
                 totalPoints,
                 earnedPoints,
@@ -356,88 +492,204 @@ export const get_all_Student_grade_specific_classroom = asyncHandler(
               const earnedPoints =
                 answer?.answers?.reduce((sum, a) => sum + (a.points || 0), 0) ||
                 0;
-              return { totalPoints, earnedPoints };
+              return {
+                assignment,
+                totalPoints,
+                earnedPoints,
+                grading_breakdown: assignment.grading_breakdown,
+              };
             })
           );
 
-          // Aggregate per type
-          const totalQuizPoints = quizzesWithAnswers.reduce(
+          // Midterm calculations
+          const midtermQuizzes = quizzesWithAnswers.filter(
+            (q) => q.grading_breakdown === "midterm"
+          );
+          const midtermActivities = activityWithAnswers.filter(
+            (a) => a.grading_breakdown === "midterm"
+          );
+          const midtermAssignments = assignmentsWithAnswers.filter(
+            (a) => a.grading_breakdown === "midterm"
+          );
+          const midtermExams = examsWithAnswers.filter(
+            (e) => e.grading_breakdown === "midterm"
+          );
+
+          const totalMidtermQuizPoints = midtermQuizzes.reduce(
             (sum, item) => sum + item.totalPoints,
             0
           );
-          const earnedQuizPoints = quizzesWithAnswers.reduce(
+          const earnedMidtermQuizPoints = midtermQuizzes.reduce(
             (sum, item) => sum + item.earnedPoints,
             0
           );
 
-          const totalActivityPoints = activityWithAnswers.reduce(
+          const totalMidtermActivityPoints = midtermActivities.reduce(
             (sum, item) => sum + item.totalPoints,
             0
           );
-          const earnedActivityPoints = activityWithAnswers.reduce(
+          const earnedMidtermActivityPoints = midtermActivities.reduce(
             (sum, item) => sum + item.earnedPoints,
             0
           );
 
-          const totalAssignmentPoints = assignmentsWithAnswers.reduce(
+          const totalMidtermAssignmentPoints = midtermAssignments.reduce(
             (sum, item) => sum + item.totalPoints,
             0
           );
-          const earnedAssignmentPoints = assignmentsWithAnswers.reduce(
+          const earnedMidtermAssignmentPoints = midtermAssignments.reduce(
             (sum, item) => sum + item.earnedPoints,
             0
           );
 
-          const totalMidtermPoints = examsWithAnswers
-            .filter((item) => item.grading_breakdown === "midterm")
-            .reduce((sum, item) => sum + item.totalPoints, 0);
-          const earnedMidtermPoints = examsWithAnswers
-            .filter((item) => item.grading_breakdown === "midterm")
-            .reduce((sum, item) => sum + item.earnedPoints, 0);
+          const totalMidtermExamPoints = midtermExams.reduce(
+            (sum, item) => sum + item.totalPoints,
+            0
+          );
+          const earnedMidtermExamPoints = midtermExams.reduce(
+            (sum, item) => sum + item.earnedPoints,
+            0
+          );
 
-          const totalFinalPoints = examsWithAnswers
-            .filter((item) => item.grading_breakdown === "final")
-            .reduce((sum, item) => sum + item.totalPoints, 0);
-          const earnedFinalPoints = examsWithAnswers
-            .filter((item) => item.grading_breakdown === "final")
-            .reduce((sum, item) => sum + item.earnedPoints, 0);
+          // Final calculations
+          const finalQuizzes = quizzesWithAnswers.filter(
+            (q) => q.grading_breakdown === "final"
+          );
+          const finalActivities = activityWithAnswers.filter(
+            (a) => a.grading_breakdown === "final"
+          );
+          const finalAssignments = assignmentsWithAnswers.filter(
+            (a) => a.grading_breakdown === "final"
+          );
+          const finalExams = examsWithAnswers.filter(
+            (e) => e.grading_breakdown === "final"
+          );
 
-          // Calculate grades
-          const quiz_grade =
-            parseFloat(
-              (
-                (earnedQuizPoints / totalQuizPoints) *
-                classroom.grading_system.quiz
-              ).toFixed(1)
-            ) || 0;
-          const midterm_grade =
-            parseFloat(
-              (
-                (earnedMidtermPoints / totalMidtermPoints) *
-                classroom.grading_system.midterm
-              ).toFixed(1)
-            ) || 0;
-          const final_grade =
-            parseFloat(
-              (
-                (earnedFinalPoints / totalFinalPoints) *
-                classroom.grading_system.final
-              ).toFixed(1)
-            ) || 0;
-          const activity_grade =
-            parseFloat(
-              (
-                (earnedActivityPoints / totalActivityPoints) *
-                classroom.grading_system.activity
-              ).toFixed(1)
-            ) || 0;
-          const assignment_grade =
-            parseFloat(
-              (
-                (earnedAssignmentPoints / totalAssignmentPoints) *
-                classroom.grading_system.assignment
-              ).toFixed(1)
-            ) || 0;
+          const totalFinalQuizPoints = finalQuizzes.reduce(
+            (sum, item) => sum + item.totalPoints,
+            0
+          );
+          const earnedFinalQuizPoints = finalQuizzes.reduce(
+            (sum, item) => sum + item.earnedPoints,
+            0
+          );
+
+          const totalFinalActivityPoints = finalActivities.reduce(
+            (sum, item) => sum + item.totalPoints,
+            0
+          );
+          const earnedFinalActivityPoints = finalActivities.reduce(
+            (sum, item) => sum + item.earnedPoints,
+            0
+          );
+
+          const totalFinalAssignmentPoints = finalAssignments.reduce(
+            (sum, item) => sum + item.totalPoints,
+            0
+          );
+          const earnedFinalAssignmentPoints = finalAssignments.reduce(
+            (sum, item) => sum + item.earnedPoints,
+            0
+          );
+
+          const totalFinalExamPoints = finalExams.reduce(
+            (sum, item) => sum + item.totalPoints,
+            0
+          );
+          const earnedFinalExamPoints = finalExams.reduce(
+            (sum, item) => sum + item.earnedPoints,
+            0
+          );
+
+          // Calculate grades for each term
+          const midtermQuizGrade =
+            totalMidtermQuizPoints > 0
+              ? parseFloat(
+                  (earnedMidtermQuizPoints / totalMidtermQuizPoints) *
+                    classroom.grading_system.midterm.quiz
+                ).toFixed(1)
+              : 0;
+
+          const midtermActivityGrade =
+            totalMidtermActivityPoints > 0
+              ? parseFloat(
+                  (earnedMidtermActivityPoints / totalMidtermActivityPoints) *
+                    classroom.grading_system.midterm.activity
+                ).toFixed(1)
+              : 0;
+
+          const midtermAssignmentGrade =
+            totalMidtermAssignmentPoints > 0
+              ? parseFloat(
+                  (earnedMidtermAssignmentPoints /
+                    totalMidtermAssignmentPoints) *
+                    classroom.grading_system.midterm.assignment
+                ).toFixed(1)
+              : 0;
+
+          const midtermExamGrade =
+            totalMidtermExamPoints > 0
+              ? parseFloat(
+                  (earnedMidtermExamPoints / totalMidtermExamPoints) *
+                    classroom.grading_system.midterm.exam
+                ).toFixed(1)
+              : 0;
+
+          const finalQuizGrade =
+            totalFinalQuizPoints > 0
+              ? parseFloat(
+                  (earnedFinalQuizPoints / totalFinalQuizPoints) *
+                    classroom.grading_system.final.quiz
+                ).toFixed(1)
+              : 0;
+
+          const finalActivityGrade =
+            totalFinalActivityPoints > 0
+              ? parseFloat(
+                  (earnedFinalActivityPoints / totalFinalActivityPoints) *
+                    classroom.grading_system.final.activity
+                ).toFixed(1)
+              : 0;
+
+          const finalAssignmentGrade =
+            totalFinalAssignmentPoints > 0
+              ? parseFloat(
+                  (earnedFinalAssignmentPoints / totalFinalAssignmentPoints) *
+                    classroom.grading_system.final.assignment
+                ).toFixed(1)
+              : 0;
+
+          const finalExamGrade =
+            totalFinalExamPoints > 0
+              ? parseFloat(
+                  (earnedFinalExamPoints / totalFinalExamPoints) *
+                    classroom.grading_system.final.exam
+                ).toFixed(1)
+              : 0;
+
+          // Calculate term grades
+          const midtermGrade = parseFloat(
+            (
+              parseFloat(midtermQuizGrade) +
+              parseFloat(midtermActivityGrade) +
+              parseFloat(midtermAssignmentGrade) +
+              parseFloat(midtermExamGrade)
+            ).toFixed(1)
+          );
+
+          const finalGrade = parseFloat(
+            (
+              parseFloat(finalQuizGrade) +
+              parseFloat(finalActivityGrade) +
+              parseFloat(finalAssignmentGrade) +
+              parseFloat(finalExamGrade)
+            ).toFixed(1)
+          );
+
+          // Calculate overall grade (average of midterm and final)
+          const overallGrade = parseFloat(
+            ((parseFloat(midtermGrade) + parseFloat(finalGrade)) / 2).toFixed(1)
+          );
 
           return {
             classroom: {
@@ -445,38 +697,54 @@ export const get_all_Student_grade_specific_classroom = asyncHandler(
             },
             student: student,
             grades: {
-              quiz: {
-                totalPoints: totalQuizPoints,
-                earnedPoints: earnedQuizPoints,
-                quiz: quiz_grade,
-              },
-              activity: {
-                totalPoints: totalActivityPoints,
-                earnedPoints: earnedActivityPoints,
-                activity: activity_grade,
-              },
-              assignment: {
-                totalPoints: totalAssignmentPoints,
-                earnedPoints: earnedAssignmentPoints,
-                assignment: assignment_grade,
-              },
               midterm: {
-                totalPoints: totalMidtermPoints,
-                earnedPoints: earnedMidtermPoints,
-                midterm: midterm_grade,
+                quiz: {
+                  totalPoints: totalMidtermQuizPoints,
+                  earnedPoints: earnedMidtermQuizPoints,
+                  grade: parseFloat(midtermQuizGrade),
+                },
+                activity: {
+                  totalPoints: totalMidtermActivityPoints,
+                  earnedPoints: earnedMidtermActivityPoints,
+                  grade: parseFloat(midtermActivityGrade),
+                },
+                assignment: {
+                  totalPoints: totalMidtermAssignmentPoints,
+                  earnedPoints: earnedMidtermAssignmentPoints,
+                  grade: parseFloat(midtermAssignmentGrade),
+                },
+                exam: {
+                  totalPoints: totalMidtermExamPoints,
+                  earnedPoints: earnedMidtermExamPoints,
+                  grade: parseFloat(midtermExamGrade),
+                },
+                term_grade: parseFloat(midtermGrade),
               },
               final: {
-                totalPoints: totalFinalPoints,
-                earnedPoints: earnedFinalPoints,
-                final: final_grade,
+                quiz: {
+                  totalPoints: totalFinalQuizPoints,
+                  earnedPoints: earnedFinalQuizPoints,
+                  grade: parseFloat(finalQuizGrade),
+                },
+                activity: {
+                  totalPoints: totalFinalActivityPoints,
+                  earnedPoints: earnedFinalActivityPoints,
+                  grade: parseFloat(finalActivityGrade),
+                },
+                assignment: {
+                  totalPoints: totalFinalAssignmentPoints,
+                  earnedPoints: earnedFinalAssignmentPoints,
+                  grade: parseFloat(finalAssignmentGrade),
+                },
+                exam: {
+                  totalPoints: totalFinalExamPoints,
+                  earnedPoints: earnedFinalExamPoints,
+                  grade: parseFloat(finalExamGrade),
+                },
+                term_grade: parseFloat(finalGrade),
               },
               student_grade: {
-                grade:
-                  quiz_grade +
-                  activity_grade +
-                  assignment_grade +
-                  midterm_grade +
-                  final_grade,
+                grade: parseFloat(overallGrade),
               },
             },
           };
