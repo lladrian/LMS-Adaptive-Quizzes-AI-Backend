@@ -34,12 +34,10 @@ export const create_quiz_option = asyncHandler(async (req, res) => {
       !title ||
       !description
     ) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Please provide all fields (classroom_id, question_option, time_limit, title, description).",
-        });
+      return res.status(400).json({
+        message:
+          "Please provide all fields (classroom_id, question_option, time_limit, title, description).",
+      });
     }
 
     const newQuiz = new Quiz({
@@ -66,24 +64,30 @@ export const create_quiz = asyncHandler(async (req, res) => {
     time_limit,
     title,
     description,
-    answer_type,
+    grading_breakdown,
   } = req.body;
 
   try {
     // Check if all required fields are provided
-    if (!classroom_id || !question || !time_limit || !title || !description) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Please provide all fields (classroom_id, question, time_limit, title, description).",
-        });
+    if (
+      !classroom_id ||
+      !question ||
+      !time_limit ||
+      !title ||
+      !description ||
+      !grading_breakdown
+    ) {
+      return res.status(400).json({
+        message:
+          "Please provide all fields (classroom_id, question, time_limit, title, description, grading_breakdown).",
+      });
     }
 
     const newQuiz = new Quiz({
       classroom: classroom_id,
       question: question,
       title: title,
+      grading_breakdown: grading_breakdown,
       description: description,
       submission_time: time_limit,
       created_at: storeCurrentDate(0, "hours"),
@@ -172,12 +176,10 @@ export const update_quiz_option = asyncHandler(async (req, res) => {
 
   try {
     if (!classroom_id || !question_option || !title || !description) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Please provide all fields (classroom_id, question_option, title, description).",
-        });
+      return res.status(400).json({
+        message:
+          "Please provide all fields (classroom_id, question_option, title, description).",
+      });
     }
 
     const updatedQuiz = await Quiz.findById(id);
@@ -208,16 +210,21 @@ export const update_quiz_option = asyncHandler(async (req, res) => {
 
 export const update_quiz = asyncHandler(async (req, res) => {
   const { id } = req.params; // Get the meal ID from the request parameters
-  const { classroom_id, question, time_limit, title, description } = req.body;
+  const {
+    classroom_id,
+    question,
+    time_limit,
+    title,
+    description,
+    grading_breakdown,
+  } = req.body;
 
   try {
     if (!classroom_id || !question || !title || !description) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Please provide all fields (classroom_id, question, title, description).",
-        });
+      return res.status(400).json({
+        message:
+          "Please provide all fields (classroom_id, question, title, description).",
+      });
     }
 
     const updatedQuiz = await Quiz.findById(id);
@@ -229,6 +236,11 @@ export const update_quiz = asyncHandler(async (req, res) => {
     updatedQuiz.classroom = classroom_id ? classroom_id : updatedQuiz.classroom;
     updatedQuiz.question = question ? question : updatedQuiz.question;
     updatedQuiz.title = title ? title : updatedQuiz.title;
+
+    updatedQuiz.grading_breakdown = grading_breakdown
+      ? grading_breakdown
+      : updatedQuiz.grading_breakdown;
+
     updatedQuiz.description = description
       ? description
       : updatedQuiz.description;

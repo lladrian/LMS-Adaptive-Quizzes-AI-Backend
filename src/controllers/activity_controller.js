@@ -64,14 +64,28 @@ export const get_specific_activity_specific_answer = asyncHandler(
 );
 
 export const create_activity = asyncHandler(async (req, res) => {
-  const { classroom_id, description, title, time_limit, question } = req.body;
+  const {
+    classroom_id,
+    description,
+    title,
+    time_limit,
+    question,
+    grading_breakdown,
+  } = req.body;
 
   try {
     // Check if all required fields are provided
-    if (!classroom_id || !description || !title || !question || !time_limit) {
+    if (
+      !classroom_id ||
+      !description ||
+      !title ||
+      !question ||
+      !time_limit ||
+      !grading_breakdown
+    ) {
       return res.status(400).json({
         message:
-          "Please provide all fields (classroom_id, description, timelimit, title, question).",
+          "Please provide all fields (classroom_id, description, timelimit, title, question, grading_breakdown).",
       });
     }
 
@@ -79,6 +93,7 @@ export const create_activity = asyncHandler(async (req, res) => {
       question: question,
       classroom: classroom_id,
       title: title,
+      grading_breakdown: grading_breakdown,
       description: description,
       submission_time: time_limit,
       created_at: storeCurrentDate(0, "hours"),
@@ -136,10 +151,24 @@ export const get_specific_activity = asyncHandler(async (req, res) => {
 
 export const update_activity = asyncHandler(async (req, res) => {
   const { id } = req.params; // Get the meal ID from the request parameters
-  const { classroom_id, description, title, question, time_limit } = req.body;
+  const {
+    classroom_id,
+    description,
+    title,
+    question,
+    time_limit,
+    grading_breakdown,
+  } = req.body;
 
   try {
-    if (!classroom_id || !description || !title || !question || !time_limit) {
+    if (
+      !classroom_id ||
+      !description ||
+      !title ||
+      !question ||
+      !time_limit ||
+      !grading_breakdown
+    ) {
       return res.status(400).json({
         message:
           "Please provide all fields (classroom_id, description, title, time_limit, question).",
@@ -151,6 +180,9 @@ export const update_activity = asyncHandler(async (req, res) => {
     updatedActivity.classroom = classroom_id
       ? classroom_id
       : updatedActivity.classroom;
+    updatedActivity.grading_breakdown = grading_breakdown
+      ? grading_breakdown
+      : updatedActivity.grading_breakdown;
     updatedActivity.description = description
       ? description
       : updatedActivity.description;

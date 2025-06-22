@@ -46,12 +46,26 @@ export const create_assignment_option = asyncHandler(async (req, res) => {
 });
 
 export const create_assignment = asyncHandler(async (req, res) => {
-  const { classroom_id, question, time_limit, title, description } = req.body;
+  const {
+    classroom_id,
+    question,
+    time_limit,
+    title,
+    description,
+    grading_breakdown,
+  } = req.body;
 
-  if (!classroom_id || !question || !time_limit || !title || !description) {
+  if (
+    !classroom_id ||
+    !question ||
+    !time_limit ||
+    !title ||
+    !description ||
+    !grading_breakdown
+  ) {
     return res.status(400).json({
       message:
-        "Please provide all fields (classroom_id, question, time_limit, title, description).",
+        "Please provide all fields (classroom_id, question, time_limit, title, description, grading_breakdown).",
     });
   }
 
@@ -59,6 +73,7 @@ export const create_assignment = asyncHandler(async (req, res) => {
     classroom: classroom_id,
     question,
     title,
+    grading_breakdown,
     description,
     submission_time: time_limit,
     created_at: storeCurrentDate(0, "hours"),
@@ -165,12 +180,25 @@ export const update_assignment_option = asyncHandler(async (req, res) => {
 
 export const update_assignment = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { classroom_id, question, time_limit, title, description } = req.body;
+  const {
+    classroom_id,
+    question,
+    time_limit,
+    title,
+    description,
+    grading_breakdown,
+  } = req.body;
 
-  if (!classroom_id || !question || !title || !description) {
+  if (
+    !classroom_id ||
+    !question ||
+    !title ||
+    !description ||
+    !grading_breakdown
+  ) {
     return res.status(400).json({
       message:
-        "Please provide all fields (classroom_id, question, title, description).",
+        "Please provide all fields (classroom_id, question, title, description, grading_breakdown).",
     });
   }
 
@@ -181,6 +209,8 @@ export const update_assignment = asyncHandler(async (req, res) => {
   updatedAssignment.classroom = classroom_id || updatedAssignment.classroom;
   updatedAssignment.question = question || updatedAssignment.question;
   updatedAssignment.title = title || updatedAssignment.title;
+  updatedAssignment.grading_breakdown =
+    grading_breakdown || updatedAssignment.grading_breakdown;
   updatedAssignment.description = description || updatedAssignment.description;
   updatedAssignment.submission_time =
     time_limit || updatedAssignment.submission_time;
