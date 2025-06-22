@@ -15,22 +15,15 @@ import Assignment from "../models/assignment.js";
 import AnswerAssignment from "../models/answer_assignment.js";
 
 function storeCurrentDate(expirationAmount, expirationUnit) {
-  // Get the current date and time in Asia/Manila timezone
   const currentDateTime = moment.tz("Asia/Manila");
-  // Calculate the expiration date and time
   const expirationDateTime = currentDateTime
     .clone()
     .add(expirationAmount, expirationUnit);
-
-  // Format the current date and expiration date
   const formattedExpirationDateTime = expirationDateTime.format(
     "YYYY-MM-DD HH:mm:ss"
   );
-
-  // Return both current and expiration date-time
   return formattedExpirationDateTime;
 }
-
 export const create_classroom = asyncHandler(async (req, res) => {
   const {
     classroom_name,
@@ -39,10 +32,10 @@ export const create_classroom = asyncHandler(async (req, res) => {
     classroom_code,
     description,
     programming_language,
+    grading_system,
   } = req.body;
 
   try {
-    // Check if all required fields are provided
     if (
       !classroom_name ||
       !subject_code ||
@@ -55,21 +48,40 @@ export const create_classroom = asyncHandler(async (req, res) => {
           "Please provide all fields (classroom_name, subject_code, instructor, classroom_code, description, programming_language).",
       });
     }
+
+    // Set default grading system if not provided
+    const defaultGradingSystem = {
+      midterm: {
+        quiz: 15,
+        exam: 50,
+        activity: 20,
+        assignment: 15,
+      },
+      final: {
+        quiz: 15,
+        exam: 50,
+        activity: 20,
+        assignment: 15,
+      },
+    };
+
     const newClassroom = new Classroom({
-      classroom_name: classroom_name,
-      subject_code: subject_code,
-      programming_language: programming_language,
-      instructor: instructor,
-      classroom_code: classroom_code,
-      description: description,
+      classroom_name,
+      subject_code,
+      programming_language,
+      instructor,
+      classroom_code,
+      description,
+      grading_system: grading_system || defaultGradingSystem,
       created_at: storeCurrentDate(0, "hours"),
     });
 
     await newClassroom.save();
 
-    return res
-      .status(200)
-      .json({ message: "New classroom successfully created." });
+    return res.status(200).json({
+      message: "New classroom successfully created.",
+      data: newClassroom,
+    });
   } catch (error) {
     return res.status(500).json({ error: "Failed to create classroom." });
   }
@@ -424,23 +436,37 @@ export const get_specific_classroom = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: "Classroom not found." });
     }
 
+    // Separate activities by grading period
     const exams = await Exam.find({ classroom: classroom.id });
     const quizzes = await Quiz.find({ classroom: classroom.id });
     const activities = await Activity.find({ classroom: classroom.id });
-    const assignments = await Assignment.find({ classroom: classroom.id }); // ✅ Added
+    const assignments = await Assignment.find({ classroom: classroom.id });
     const materials = await Material.find({ classroom: classroom.id });
-
     const students = await Student.find({ joined_classroom: classroom.id });
+
+    // Categorize activities by grading period
+    const midtermActivities = {
+      exams: exams.filter((a) => a.grading_breakdown === "midterm"),
+      quizzes: quizzes.filter((a) => a.grading_breakdown === "midterm"),
+      activities: activities.filter((a) => a.grading_breakdown === "midterm"),
+      assignments: assignments.filter((a) => a.grading_breakdown === "midterm"),
+    };
+
+    const finalActivities = {
+      exams: exams.filter((a) => a.grading_breakdown === "final"),
+      quizzes: quizzes.filter((a) => a.grading_breakdown === "final"),
+      activities: activities.filter((a) => a.grading_breakdown === "final"),
+      assignments: assignments.filter((a) => a.grading_breakdown === "final"),
+    };
 
     return res.status(200).json({
       data: {
         classroom,
-        exams,
-        quizzes,
-        activities,
-        assignments, // ✅ Included in response
+        midtermActivities,
+        finalActivities,
         materials,
         students,
+        gradingSystem: classroom.grading_system,
       },
     });
   } catch (error) {
@@ -520,7 +546,6 @@ export const update_classroom = asyncHandler(async (req, res) => {
     description,
     programming_language,
     grading_system,
-    restricted_sections,
   } = req.body;
 
   try {
@@ -543,18 +568,43 @@ export const update_classroom = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: "Classroom not found" });
     }
 
+    // Validate grading system structure
+    if (grading_system) {
+      if (!grading_system.midterm || !grading_system.final) {
+        return res.status(400).json({
+          message:
+            "Grading system must include both midterm and final structures",
+        });
+      }
+
+      // Validate weights sum to 100 for each term
+      const validateTermWeights = (term) => {
+        const weights = Object.values(term);
+        const sum = weights.reduce((a, b) => a + b, 0);
+        return sum === 100;
+      };
+
+      if (
+        !validateTermWeights(grading_system.midterm) ||
+        !validateTermWeights(grading_system.final)
+      ) {
+        return res.status(400).json({
+          message: "Grading components for each term must sum to 100%",
+        });
+      }
+    }
+
     updatedClassroom.description = description;
     updatedClassroom.classroom_name = classroom_name;
     updatedClassroom.subject_code = subject_code;
     updatedClassroom.programming_language = programming_language;
     updatedClassroom.grading_system = grading_system;
-    updatedClassroom.restricted_sections = restricted_sections || [];
 
     await updatedClassroom.save();
 
     return res.status(200).json({
-      data: "Classroom successfully updated.",
-      classroom: updatedClassroom,
+      message: "Classroom successfully updated.",
+      data: updatedClassroom,
     });
   } catch (error) {
     return res.status(500).json({ error: "Failed to update classroom." });

@@ -1,27 +1,50 @@
 import mongoose from "mongoose";
 
-const GradingSchema = new mongoose.Schema({
-  quiz: {
-    type: Number,
-    default: 15,
+const TermGradingSchema = new mongoose.Schema(
+  {
+    quiz: {
+      type: Number,
+      default: 15,
+    },
+    exam: {
+      type: Number,
+      default: 50,
+    },
+    activity: {
+      type: Number,
+      default: 20,
+    },
+    assignment: {
+      type: Number,
+      default: 15,
+    },
   },
-  midterm: {
-    type: Number,
-    default: 25,
+  { _id: false }
+); // Prevent creating IDs for subdocuments
+
+const GradingSchema = new mongoose.Schema(
+  {
+    midterm: {
+      type: TermGradingSchema,
+      default: () => ({
+        quiz: 15,
+        exam: 50,
+        activity: 20,
+        assignment: 15,
+      }),
+    },
+    final: {
+      type: TermGradingSchema,
+      default: () => ({
+        quiz: 15,
+        exam: 50,
+        activity: 20,
+        assignment: 15,
+      }),
+    },
   },
-  final: {
-    type: Number,
-    default: 25,
-  },
-  activity: {
-    type: Number,
-    default: 20,
-  },
-  assignment: {
-    type: Number,
-    default: 15,
-  },
-});
+  { _id: false }
+);
 
 const ClassroomSchema = new mongoose.Schema({
   classroom_name: {
@@ -51,6 +74,7 @@ const ClassroomSchema = new mongoose.Schema({
     unique: true,
   },
   grading_system: {
+    // Changed from grading_system to grading_system
     type: GradingSchema,
     default: () => ({}),
   },

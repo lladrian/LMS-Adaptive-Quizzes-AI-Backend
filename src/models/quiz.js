@@ -51,7 +51,8 @@ const QuizSchema = new mongoose.Schema({
   },
   grading_breakdown: {
     type: String,
-    default: "quiz",
+    enum: ["final", "midterm"],
+    required: true,
   },
   submission_time: {
     type: Number,

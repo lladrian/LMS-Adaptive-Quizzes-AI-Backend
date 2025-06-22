@@ -51,7 +51,8 @@ const AssignmentSchema = new mongoose.Schema({
   },
   grading_breakdown: {
     type: String,
-    default: "assignment",
+    enum: ["final", "midterm"],
+    required: true,
   },
   submission_time: {
     type: Number,
