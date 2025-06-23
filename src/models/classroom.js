@@ -15,11 +15,25 @@ const GradingSchema = new mongoose.Schema(
   {
     midterm: {
       type: TermGradingSchema,
-      default: () => ({ components: {} }),
+      default: () => ({
+        components: new Map([
+          ["quiz", 15],
+          ["exam", 50],
+          ["activity", 20],
+          ["assignment", 15],
+        ]),
+      }),
     },
     final: {
       type: TermGradingSchema,
-      default: () => ({ components: {} }),
+       default: () => ({
+        components: new Map([
+          ["quiz", 15],
+          ["exam", 50],
+          ["activity", 20],
+          ["assignment", 15],
+        ]),
+      }),
     },
   },
   { _id: false }
