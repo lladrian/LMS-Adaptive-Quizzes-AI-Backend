@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
-const AssignmentSchema = new mongoose.Schema({
+const ActivitySchema = new mongoose.Schema({
   classroom: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Classroom", // reference to the Classroom model
+    ref: "Classroom",
     required: true,
   },
   question: [
@@ -47,7 +47,7 @@ const AssignmentSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    default: "assignment",
+    default: "activity",
   },
   grading_breakdown: {
     type: String,
@@ -68,4 +68,4 @@ const AssignmentSchema = new mongoose.Schema({
   },
 });
 
-export default mongoose.model("Assignment", AssignmentSchema);
+export default mongoose.model("MainActivity", ActivitySchema);

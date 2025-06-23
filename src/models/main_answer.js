@@ -3,53 +3,55 @@ import mongoose from "mongoose";
 const AnswerSchema = new mongoose.Schema({
   questionId: {
     type: String,
-    required: false,
+    required: false
   },
   line_of_code: {
     type: String,
-    required: false,
+    required: false
   },
   selected_option: {
     type: String,
-    required: false,
+    required: false
   },
   points: {
     type: Number,
-    default: 0,
+    default: 0
   },
   is_correct: {
     type: Number,
-    default: 0,
-  },
+    default: 0
+  }
 });
 
-const AnswerActivitySchema = new mongoose.Schema({
-  activity: {
+
+const MainAnswerSchema = new mongoose.Schema({
+  main_activity: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Activity", // reference to the Activity model
-    required: true,
+    ref: 'MainActivity', // reference to the Instructor model
+    required: true
   },
   student: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Student", // reference to the Student model
-    required: true,
+    ref: 'Student', // reference to the Instructor model
+    required: true
   },
   answers: {
     type: [AnswerSchema],
-    default: [],
+    default: [] // ✅ default to empty array
   },
   opened_at: {
     type: String,
-    default: null,
+    default: null
   },
   submitted_at: {
     type: String,
-    default: null,
+    default: null
   },
   created_at: {
     type: String,
-    default: null,
+    default: null
   },
 });
 
-export default mongoose.model("AnswerActivity", AnswerActivitySchema);
+
+export default mongoose.model('MainAnswer', MainAnswerSchema);
