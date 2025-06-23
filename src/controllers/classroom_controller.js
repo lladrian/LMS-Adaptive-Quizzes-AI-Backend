@@ -242,7 +242,8 @@ export const get_all_classroom_overview_specific_instructor = asyncHandler(
   }
 );
 
-export const get_all_activities_specific_student_specific_classroom = asyncHandler(async (req, res) => {
+export const get_all_activities_specific_student_specific_classroom =
+  asyncHandler(async (req, res) => {
     const { classroom_id, student_id } = req.params;
 
     try {
@@ -259,7 +260,9 @@ export const get_all_activities_specific_student_specific_classroom = asyncHandl
         return res.status(404).json({ message: "Student not found." });
       }
 
-      const main_activity = await MainActivity.find({ classroom: classroom.id });
+      const main_activity = await MainActivity.find({
+        classroom: classroom.id,
+      });
 
       const activity_answers = await MainAnswer.find({
         student: student.id,
@@ -268,7 +271,8 @@ export const get_all_activities_specific_student_specific_classroom = asyncHandl
         populate: { path: "classroom", match: { _id: classroom.id } },
       });
 
-      const main_answers = activity_answers.filter((answer) =>
+      const main_answers = activity_answers.filter(
+        (answer) =>
           answer.quiz?.classroom?._id.toString() === classroom.id.toString()
       );
 
@@ -347,7 +351,6 @@ export const get_all_classroom_student = asyncHandler(async (req, res) => {
   }
 });
 
-
 export const get_specific_classroom = asyncHandler(async (req, res) => {
   const { classroom_id } = req.params;
 
@@ -360,14 +363,32 @@ export const get_specific_classroom = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: "Classroom not found." });
     }
 
-    const main_activity = await MainActivity.find({ classroom: classroom.id });
+    // Get all activities and separate them by grading_breakdown
+    const allActivities = await MainActivity.find({ classroom: classroom.id });
+
+    const midtermActivities = allActivities.filter(
+      (activity) => activity.grading_breakdown === "midterm"
+    );
+
+    const finalActivities = allActivities.filter(
+      (activity) => activity.grading_breakdown === "final"
+    );
+
+    // Sort all activities by created_at (newest first)
+    const sortedActivities = [...midtermActivities, ...finalActivities].sort(
+      (a, b) => {
+        return new Date(b.created_at) - new Date(a.created_at);
+      }
+    );
+
     const materials = await Material.find({ classroom: classroom.id });
     const students = await Student.find({ joined_classroom: classroom.id });
 
-
     return res.status(200).json({
       data: {
-        main_activity,
+        activities: sortedActivities,
+        midtermActivities,
+        finalActivities,
         classroom,
         materials,
         students,
@@ -477,8 +498,11 @@ export const update_classroom = asyncHandler(async (req, res) => {
       }
 
       // Validate weights sum to 100 for each term
+
+      // Validate weights sum to 100 for each term
       const validateTermWeights = (term) => {
-        const weights = Object.values(term);
+        if (!term || !term.components) return false;
+        const weights = Object.values(term.components);
         const sum = weights.reduce((a, b) => a + b, 0);
         return sum === 100;
       };

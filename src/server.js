@@ -19,10 +19,6 @@ import otp_routes from "./routes/otp_routes.js";
 import promoteRoutes from "./routes/promote_routes.js";
 import studentRoutes from "./routes/student_routes.js";
 
-
-
-
-
 import path from "path"; // Import the path module
 import fs from "fs"; // Import fs to check if the directory exists
 import { fileURLToPath } from "url"; // Import fileURLToPath
@@ -58,12 +54,6 @@ app.use("/materials", materialRoutes);
 app.use("/otp", otp_routes);
 app.use("/promotes", promoteRoutes);
 app.use("/students", studentRoutes);
-
-
-
-
-
-
 
 connectDB();
 

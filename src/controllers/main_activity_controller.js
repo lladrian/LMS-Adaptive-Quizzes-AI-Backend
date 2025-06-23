@@ -21,7 +21,6 @@ function storeCurrentDate(expirationAmount, expirationUnit) {
   return formattedExpirationDateTime;
 }
 
-
 export const create_activity = asyncHandler(async (req, res) => {
   const {
     classroom_id,
@@ -43,12 +42,10 @@ export const create_activity = asyncHandler(async (req, res) => {
       !activity_type ||
       !grading_breakdown
     ) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Please provide all fields (classroom_id, question, time_limit, title, description, grading_breakdown, activity_type).",
-        });
+      return res.status(400).json({
+        message:
+          "Please provide all fields (classroom_id, question, time_limit, title, description, grading_breakdown, activity_type).",
+      });
     }
 
     const newMainActivity = new MainActivity({
@@ -70,7 +67,8 @@ export const create_activity = asyncHandler(async (req, res) => {
   }
 });
 
-export const get_all_activity_specific_classroom = asyncHandler(async (req, res) => {
+export const get_all_activity_specific_classroom = asyncHandler(
+  async (req, res) => {
     const { classroom_id } = req.params; // Get the meal ID from the request parameters
 
     try {
@@ -95,12 +93,14 @@ export const get_all_activity_specific_classroom = asyncHandler(async (req, res)
   }
 );
 
-
-export const get_specific_activity_specific_answer = asyncHandler(async (req, res) => {
+export const get_specific_activity_specific_answer = asyncHandler(
+  async (req, res) => {
     const { activity_id, student_id } = req.params; // Get the meal ID from the request parameters
 
     try {
-      const main_activity = await MainActivity.findById(activity_id).populate("classroom");
+      const main_activity = await MainActivity.findById(activity_id).populate(
+        "classroom"
+      );
 
       if (!main_activity) {
         return res.status(404).json({ message: "Activity not found." });
@@ -116,7 +116,9 @@ export const get_specific_activity_specific_answer = asyncHandler(async (req, re
 
       return res.status(200).json({ data: main_answer });
     } catch (error) {
-      return res.status(500).json({ error: "Failed to get specific activity." });
+      return res
+        .status(500)
+        .json({ error: "Failed to get specific activity." });
     }
   }
 );
@@ -125,7 +127,9 @@ export const get_specific_activity = asyncHandler(async (req, res) => {
   const { activity_id } = req.params; // Get the meal ID from the request parameters
 
   try {
-    const main_activity = await MainActivity.findById(activity_id).populate("classroom");
+    const main_activity = await MainActivity.findById(activity_id).populate(
+      "classroom"
+    );
 
     if (!main_activity) {
       return res.status(404).json({ message: "Activity not found." });
@@ -146,7 +150,6 @@ export const update_activity = asyncHandler(async (req, res) => {
     title,
     description,
     grading_breakdown,
-    activity_type,
   } = req.body;
 
   try {
@@ -156,15 +159,12 @@ export const update_activity = asyncHandler(async (req, res) => {
       !time_limit ||
       !title ||
       !description ||
-      !grading_breakdown || 
-      !activity_type 
+      !grading_breakdown
     ) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Please provide all fields (classroom_id, question, title, description, grading_breakdown, time_limit, activity_type).",
-        });
+      return res.status(400).json({
+        message:
+          "Please provide all fields (classroom_id, question, title, description, grading_breakdown, time_limit, activity_type).",
+      });
     }
 
     const updatedExam = await Exam.findById(id);
@@ -176,12 +176,16 @@ export const update_activity = asyncHandler(async (req, res) => {
     updatedExam.classroom = classroom_id ? classroom_id : updatedExam.classroom;
     updatedExam.question = question ? question : updatedExam.question;
     updatedExam.title = title ? title : updatedExam.title;
-    updatedExam.description = description ? description : updatedExam.description;
-    updatedExam.grading_breakdown = grading_breakdown ? grading_breakdown : updatedExam.grading_breakdown;
-    updatedExam.submission_time = time_limit ? time_limit : updatedExam.submission_time;
-    updatedExam.submission_time = activity_type ? activity_type : updatedExam.activity_type;
+    updatedExam.description = description
+      ? description
+      : updatedExam.description;
+    updatedExam.grading_breakdown = grading_breakdown
+      ? grading_breakdown
+      : updatedExam.grading_breakdown;
+    updatedExam.submission_time = time_limit
+      ? time_limit
+      : updatedExam.submission_time;
 
-    
     await updatedExam.save();
 
     return res.status(200).json({ data: "Exam successfully updated." });
