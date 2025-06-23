@@ -45,9 +45,9 @@ const ActivitySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  type: {
+  activity_type: {
     type: String,
-    default: "activity",
+    required: true,
   },
   grading_breakdown: {
     type: String,

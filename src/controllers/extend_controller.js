@@ -1,64 +1,34 @@
-// controllers/extend_controller.js
-import Activity from "../models/activity.js";
-import Quiz from "../models/quiz.js";
-import Exam from "../models/exam.js";
-import Assignment from "../models/assignment.js";
+import MainActivity from "../models/main_activity.js";
+import asyncHandler from 'express-async-handler';
 
-const modelMap = {
-  activity: Activity,
-  quiz: Quiz,
-  exam: Exam,
-  assignment: Assignment,
-};
-
-export const extendTime = async (req, res) => {
-  try {
-    const { activityType, activityId } = req.params;
+export const extend_time = asyncHandler(async (req, res) => {    
+    const { activity_id } = req.params; // Get the meal ID from the request parameters
     const { minutes } = req.body;
 
-    // Validate minutes
-    if (!minutes || isNaN(minutes)) {
-      return res.status(400).json({
-        error: "Please provide valid minutes as a number",
-      });
+    try {
+        if (!minutes) {
+            return res.status(400).json({ message: "All fields are required: minutes." });
+        }
+
+        const updatedMainActivity = await MainActivity.findById(activity_id);
+
+        if (!updatedMainActivity) return res.status(404).json({ message: 'Activity not found' });
+
+        updatedMainActivity.extended_minutes = minutes ? minutes : updatedLanguage.extended_minutes;
+
+        await updatedMainActivity.save();
+
+        return res.status(200).json({ 
+            success: true,
+            data: {
+              id: updatedMainActivity._id,
+              extended_minutes: updatedMainActivity.extended_minutes,
+              total_time: updatedMainActivity.submission_time + updatedMainActivity.extended_minutes,
+            },
+            message: `Time extended by ${minutes} minutes successfully`,
+         });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to update activity.' });
     }
+});
 
-    const model = modelMap[activityType];
-    if (!model) {
-      return res.status(400).json({
-        error:
-          "Invalid activity type. Must be one of: activity, quiz, exam, assignment",
-      });
-    }
-
-    const updatedActivity = await model.findByIdAndUpdate(
-      activityId,
-      {
-        $inc: { extended_minutes: parseInt(minutes) },
-        $set: { updated_at: new Date() },
-      },
-      { new: true }
-    );
-
-    if (!updatedActivity) {
-      return res.status(404).json({ error: "Activity not found" });
-    }
-
-    res.json({
-      success: true,
-      data: {
-        id: updatedActivity._id,
-        extended_minutes: updatedActivity.extended_minutes,
-        total_time:
-          updatedActivity.submission_time + updatedActivity.extended_minutes,
-      },
-      message: `Time extended by ${minutes} minutes successfully`,
-    });
-  } catch (error) {
-    console.error("Error extending time:", error);
-    res.status(500).json({
-      error: "Internal server error",
-      details: error.message,
-    });
-  }
-};

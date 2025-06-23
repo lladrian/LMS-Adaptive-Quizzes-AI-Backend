@@ -4,15 +4,11 @@ import dotenv from "dotenv";
 import Classroom from "../models/classroom.js";
 import Student from "../models/student.js";
 import Instructor from "../models/instructor.js";
-import Exam from "../models/exam.js";
-import Quiz from "../models/quiz.js";
+
 import Material from "../models/material.js";
-import Activity from "../models/activity.js";
-import AnswerQuiz from "../models/answer_quiz.js";
-import AnswerExam from "../models/answer_exam.js";
-import AnswerActivity from "../models/answer_activity.js";
-import Assignment from "../models/assignment.js";
-import AnswerAssignment from "../models/answer_assignment.js";
+
+import MainActivity from "../models/main_activity.js";
+import MainAnswer from "../models/main_answer.js";
 
 function storeCurrentDate(expirationAmount, expirationUnit) {
   const currentDateTime = moment.tz("Asia/Manila");
@@ -32,7 +28,6 @@ export const create_classroom = asyncHandler(async (req, res) => {
     classroom_code,
     description,
     programming_language,
-    grading_system,
   } = req.body;
 
   try {
@@ -49,22 +44,6 @@ export const create_classroom = asyncHandler(async (req, res) => {
       });
     }
 
-    // Set default grading system if not provided
-    const defaultGradingSystem = {
-      midterm: {
-        quiz: 15,
-        exam: 50,
-        activity: 20,
-        assignment: 15,
-      },
-      final: {
-        quiz: 15,
-        exam: 50,
-        activity: 20,
-        assignment: 15,
-      },
-    };
-
     const newClassroom = new Classroom({
       classroom_name,
       subject_code,
@@ -72,7 +51,6 @@ export const create_classroom = asyncHandler(async (req, res) => {
       instructor,
       classroom_code,
       description,
-      grading_system: grading_system || defaultGradingSystem,
       created_at: storeCurrentDate(0, "hours"),
     });
 
@@ -98,10 +76,6 @@ export const add_student_classroom = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: "Classroom not found" });
     if (!student)
       return res.status(404).json({ message: "Student not found." });
-
-    // if() {
-
-    // }
 
     if (student.joined_classroom.includes(classroom.id)) {
       return res.status(400).json({ message: "Classroom already exists." });
@@ -268,8 +242,7 @@ export const get_all_classroom_overview_specific_instructor = asyncHandler(
   }
 );
 
-export const get_all_activities_specific_student_specific_classroom =
-  asyncHandler(async (req, res) => {
+export const get_all_activities_specific_student_specific_classroom = asyncHandler(async (req, res) => {
     const { classroom_id, student_id } = req.params;
 
     try {
@@ -286,72 +259,21 @@ export const get_all_activities_specific_student_specific_classroom =
         return res.status(404).json({ message: "Student not found." });
       }
 
-      const exams = await Exam.find({ classroom: classroom.id });
-      const quizzes = await Quiz.find({ classroom: classroom.id });
-      const activities = await Activity.find({ classroom: classroom.id });
-      const assignments = await Assignment.find({ classroom: classroom.id });
+      const main_activity = await MainActivity.find({ classroom: classroom.id });
 
-      const quiz_answers = await AnswerQuiz.find({
+      const activity_answers = await MainAnswer.find({
         student: student.id,
       }).populate({
-        path: "quiz",
+        path: "main_activity",
         populate: { path: "classroom", match: { _id: classroom.id } },
       });
 
-      const exam_answers = await AnswerExam.find({
-        student: student.id,
-      }).populate({
-        path: "exam",
-        populate: { path: "classroom", match: { _id: classroom.id } },
-      });
-
-      const activity_answers = await AnswerActivity.find({
-        student: student.id,
-      }).populate({
-        path: "activity",
-        populate: { path: "classroom", match: { _id: classroom.id } },
-      });
-
-      const assignment_answers = await AnswerAssignment.find({
-        student: student.id,
-      }).populate({
-        path: "assignment",
-        populate: { path: "classroom", match: { _id: classroom.id } },
-      });
-
-      const all_quiz_answers = quiz_answers.filter(
-        (answer) =>
+      const main_answers = activity_answers.filter((answer) =>
           answer.quiz?.classroom?._id.toString() === classroom.id.toString()
       );
 
-      const all_exam_answers = exam_answers.filter(
-        (answer) =>
-          answer.exam?.classroom?._id.toString() === classroom.id.toString()
-      );
-
-      const all_activity_answers = activity_answers.filter(
-        (answer) =>
-          answer.activity?.classroom?._id.toString() === classroom.id.toString()
-      );
-
-      const all_assignment_answers = assignment_answers.filter(
-        (answer) =>
-          answer.assignment?.classroom?._id.toString() ===
-          classroom.id.toString()
-      );
-
-      const all_activities = [
-        ...exams,
-        ...quizzes,
-        ...activities,
-        ...assignments,
-      ];
-      const all_answers = [
-        ...all_quiz_answers,
-        ...all_exam_answers,
-        ...all_activity_answers,
-        ...all_assignment_answers,
-      ];
+      const all_activities = [...main_activity];
+      const all_answers = [...main_answers];
 
       const answeredIds = [
         ...new Set(
@@ -424,6 +346,8 @@ export const get_all_classroom_student = asyncHandler(async (req, res) => {
     return res.status(500).json({ error: "Failed to get all classrooms." });
   }
 });
+
+
 export const get_specific_classroom = asyncHandler(async (req, res) => {
   const { classroom_id } = req.params;
 
@@ -436,37 +360,17 @@ export const get_specific_classroom = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: "Classroom not found." });
     }
 
-    // Separate activities by grading period
-    const exams = await Exam.find({ classroom: classroom.id });
-    const quizzes = await Quiz.find({ classroom: classroom.id });
-    const activities = await Activity.find({ classroom: classroom.id });
-    const assignments = await Assignment.find({ classroom: classroom.id });
+    const main_activity = await MainActivity.find({ classroom: classroom.id });
     const materials = await Material.find({ classroom: classroom.id });
     const students = await Student.find({ joined_classroom: classroom.id });
 
-    // Categorize activities by grading period
-    const midtermActivities = {
-      exams: exams.filter((a) => a.grading_breakdown === "midterm"),
-      quizzes: quizzes.filter((a) => a.grading_breakdown === "midterm"),
-      activities: activities.filter((a) => a.grading_breakdown === "midterm"),
-      assignments: assignments.filter((a) => a.grading_breakdown === "midterm"),
-    };
-
-    const finalActivities = {
-      exams: exams.filter((a) => a.grading_breakdown === "final"),
-      quizzes: quizzes.filter((a) => a.grading_breakdown === "final"),
-      activities: activities.filter((a) => a.grading_breakdown === "final"),
-      assignments: assignments.filter((a) => a.grading_breakdown === "final"),
-    };
 
     return res.status(200).json({
       data: {
+        main_activity,
         classroom,
-        midtermActivities,
-        finalActivities,
         materials,
         students,
-        gradingSystem: classroom.grading_system,
       },
     });
   } catch (error) {
@@ -496,11 +400,6 @@ export const get_all_classroom_specific_student = asyncHandler(
       const classrooms = await Classroom.find({
         _id: { $in: student.joined_classroom },
       }).populate("instructor");
-
-      // const classrooms = await Classroom.find({
-      //         _id: { $in: student.joined_classroom },
-      //         is_hidden: 0
-      //     }).populate('instructor');
 
       return res.status(200).json({ data: classrooms });
     } catch (error) {

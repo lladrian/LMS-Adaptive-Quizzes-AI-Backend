@@ -4,10 +4,8 @@ import * as ExtendController from "../controllers/extend_controller.js";
 
 const extendRoutes = Router();
 
-// More RESTful endpoint structure
-extendRoutes.post(
-  "/:activityType/:activityId/time",
-  ExtendController.extendTime
-);
+extendRoutes.post('/:activity_type/time', ExtendController.extend_time);
+
+
 
 export default extendRoutes;

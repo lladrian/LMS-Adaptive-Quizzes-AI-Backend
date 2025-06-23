@@ -2,7 +2,6 @@ import asyncHandler from "express-async-handler";
 import moment from "moment-timezone";
 import dotenv from "dotenv";
 import Material from "../models/material.js";
-import AnswerActivity from "../models/answer_activity.js";
 import Student from "../models/student.js";
 
 import pdf from "pdf-parse";
