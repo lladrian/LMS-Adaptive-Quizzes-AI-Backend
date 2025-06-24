@@ -95,9 +95,10 @@ export const get_all_activity_specific_classroom = asyncHandler(
 
 export const get_specific_activity_specific_answer = asyncHandler(
   async (req, res) => {
-    const { activity_id, student_id } = req.params; // Get the meal ID from the request parameters
+    const { activity_id, student_id } = req.params;
 
     try {
+      // First get the activity with classroom populated
       const main_activity = await MainActivity.findById(activity_id).populate(
         "classroom"
       );
@@ -106,19 +107,37 @@ export const get_specific_activity_specific_answer = asyncHandler(
         return res.status(404).json({ message: "Activity not found." });
       }
 
+      // Then find the answer for this student and activity
+      // const main_answer = await MainAnswer.findOne({
+      //   student: student_id,
+      //   main_activity: activity_id,
+      // }).populate("student");
       const main_answer = await MainAnswer.findOne({
         student: student_id,
-        main_activity: main_activity.id,
-      }).populate({
-        path: "mainactivity",
-        populate: { path: "classroom" },
+        main_activity: activity_id,
+      })
+      .populate("student") // Populates student info
+      .populate({
+        path: "main_activity",
+        populate: {
+          path: "classroom", // Also populate classroom inside main_activity
+          model: "Classroom"  // Make sure this model name matches what you registered
+        }
       });
 
-      return res.status(200).json({ data: main_answer });
+      // Create the response object
+      const response = {
+        activity: main_activity,
+        answer: main_answer || null, // return null if no answer exists
+      };
+
+      return res.status(200).json({ data: response });
     } catch (error) {
-      return res
-        .status(500)
-        .json({ error: "Failed to get specific activity." });
+      console.error(error);
+      return res.status(500).json({
+        error: "Failed to get specific activity and answer.",
+        details: error.message,
+      });
     }
   }
 );

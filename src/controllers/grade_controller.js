@@ -42,18 +42,26 @@ export const compute_grade = asyncHandler(async (req, res) => {
     if (!student)
       return res.status(404).json({ message: "Student not found." });
 
+    const midtermActivities = main_activities.filter(
+      (activity) => activity.grading_breakdown === "midterm"
+    );
+
+    const finalActivities = main_activities.filter(
+      (activity) => activity.grading_breakdown === "final"
+    );
+
     // Process grades for both midterm and final terms
     const results = {
       midterm: await calculateTermGrades(
         classroom,
         student_id,
-        main_activities,
+        midtermActivities,
         "midterm"
       ),
       final: await calculateTermGrades(
         classroom,
         student_id,
-        main_activities,
+        finalActivities,
         "final"
       ),
     };
@@ -102,6 +110,14 @@ export const get_all_student_grade_specific_classroom = asyncHandler(
       if (!classroom)
         return res.status(404).json({ message: "Classroom not found" });
 
+      const midtermActivities = main_activities.filter(
+        (activity) => activity.grading_breakdown === "midterm"
+      );
+  
+      const finalActivities = main_activities.filter(
+        (activity) => activity.grading_breakdown === "final"
+      );
+
       const results = await Promise.all(
         students.map(async (student) => {
           const student_id = student._id;
@@ -109,14 +125,14 @@ export const get_all_student_grade_specific_classroom = asyncHandler(
           const midtermGrades = await calculateTermGrades(
             classroom,
             student_id,
-            main_activities,
+            midtermActivities,
             "midterm"
           );
 
           const finalGrades = await calculateTermGrades(
             classroom,
             student_id,
-            main_activities,
+            finalActivities,
             "final"
           );
 

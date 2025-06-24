@@ -35,8 +35,8 @@ export const take_activity = asyncHandler(async (req, res) => {
 
     if (existingAnswer) {
       return res
-        .status(400)
-        .json({ message: "You have already started this activity." });
+        .status(200)
+        .json({ data: "You have already started this activity." });
     }
 
     const newAnswer = new MainAnswer({
@@ -50,7 +50,7 @@ export const take_activity = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: "Student successfully started the activity." });
+      .json({ data: "Student successfully started the activity." });
   } catch (error) {
     return res.status(500).json({ error: "Failed to start activity." });
   }
@@ -217,8 +217,6 @@ export const create_answer = asyncHandler(async (req, res) => {
           is_correct = ans.selected_option === question.correct_option ? 1 : 0;
           points = is_correct ? question.points : 0;
         } else if (question.answer_type === "programming") {
-          // For programming questions, we'll assume manual grading is needed
-          // So default to 0 points unless specified otherwise
           points = ans.points || 0;
           is_correct = points > 0 ? 1 : 0;
         }
