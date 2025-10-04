@@ -41,6 +41,9 @@ export const create_student = asyncHandler(async (req, res) => {
         if (await Admin.findOne({ email })) return res.status(400).json({ message: 'Email already exists' });
         if (await Instructor.findOne({ email })) return res.status(400).json({ message: 'Email already exists' });
 
+        if (await Student.findOne({ student_id_number })) return res.status(400).json({ message: 'Student ID already exists' });
+
+
 
         const hash_password = hashConverterMD5(password);
    

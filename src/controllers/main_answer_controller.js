@@ -233,6 +233,7 @@ export const create_answer = asyncHandler(async (req, res) => {
 
     answer.answers = processedAnswers;
     answer.submitted_at = storeCurrentDate(0, "hours");
+    answer.is_submitted = true;
 
     await answer.save();
 
