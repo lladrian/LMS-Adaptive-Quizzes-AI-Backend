@@ -36,7 +36,7 @@ export const create_instructor = asyncHandler(async (req, res) => {
     try {
         // Check if all required fields are provided
         if (!first_name || !middle_name || !last_name || !email || !password) {
-            return res.status(400).json({ message: "Please provide all fields (first_name, middle_name, last_name, email, password, fullname)." });
+            return res.status(400).json({ message: "Please provide all fields (first_name, middle_name, last_name, email, password)." });
         }
         
         if (await Student.findOne({ email })) return res.status(400).json({ message: 'Email already exists' });
@@ -147,12 +147,6 @@ export const update_instructor = asyncHandler(async (req, res) => {
             await updatedInstructor.save();
         }
 
-        // if(updatedAdminInstructor) {
-        //     updatedAdminInstructor.email = email ? email : updatedAdminInstructor.email;
-        //     updatedAdminInstructor.fullname = fullname ? fullname : updatedAdminInstructor.fullname;
-                            
-        //     await updatedAdminInstructor.save();
-        // }
 
         if(updatedStudentInstructor) {
             updatedStudentInstructor.email = email ? email : updatedStudentInstructor.email;

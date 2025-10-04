@@ -169,15 +169,23 @@ export const update_admin_password = asyncHandler(async (req, res) => {
 
         const hash = hashConverterMD5(password);
         const updatedAdmin = await Admin.findById(id);
+        const updatedInstructorAdmin = await Instructor.findById(id);
+
            
-        if (!updatedAdmin) {
+        if (!updatedAdmin && !updatedInstructorAdmin) {
             return res.status(404).json({ message: "Admin not found" });
         }
-        
-        updatedAdmin.password = password ? hash : updatedAdmin.password;
-                
-        await updatedAdmin.save();
 
+        if(updatedAdmin) {
+            updatedAdmin.password = password ? hash : updatedAdmin.password;
+            await updatedAdmin.save();
+        }
+
+        if(updatedInstructorAdmin) {
+            updatedInstructorAdmin.password = password ? hash : updatedInstructorAdmin.password;
+            await updatedInstructorAdmin.save();
+        }
+        
         return res.status(200).json({ data: 'Admin password successfully updated.' });
     } catch (error) {
         return res.status(500).json({ error: 'Failed to update admin password.' });
