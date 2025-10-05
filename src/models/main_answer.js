@@ -39,6 +39,10 @@ const MainAnswerSchema = new mongoose.Schema({
     type: [AnswerSchema],
     default: [] // ✅ default to empty array
   },
+  is_submitted: {
+    type: Boolean,
+    default: false
+  },
   opened_at: {
     type: String,
     default: null

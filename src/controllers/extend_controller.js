@@ -14,7 +14,16 @@ export const extend_time = asyncHandler(async (req, res) => {
 
         if (!updatedMainActivity) return res.status(404).json({ message: 'Activity not found' });
 
-        updatedMainActivity.extended_minutes = minutes ? minutes : updatedLanguage.extended_minutes;
+        // updatedMainActivity.extended_minutes = minutes ? minutes : updatedLanguage.extended_minutes;
+
+        const currentMinutes = parseInt(updatedMainActivity.extended_minutes) || 0;
+        const inputMinutes = parseInt(minutes) || 0;
+
+        const total = currentMinutes + inputMinutes;
+
+        // ✅ Prevent result from going below 0
+        updatedMainActivity.extended_minutes = total < 0 ? 0 : total;
+
 
         await updatedMainActivity.save();
 

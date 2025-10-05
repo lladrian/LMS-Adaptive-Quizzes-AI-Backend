@@ -4,7 +4,7 @@ import * as ExtendController from "../controllers/extend_controller.js";
 
 const extendRoutes = Router();
 
-extendRoutes.post('/:activity_type/time', ExtendController.extend_time);
+extendRoutes.post('/:activity_id/time', ExtendController.extend_time);
 
 
 

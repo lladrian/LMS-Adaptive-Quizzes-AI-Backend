@@ -49,6 +49,7 @@ export const create_classroom = asyncHandler(async (req, res) => {
       subject_code,
       programming_language,
       instructor,
+      student_instructor : instructor,
       classroom_code,
       description,
       created_at: storeCurrentDate(0, "hours"),
@@ -195,18 +196,16 @@ export const student_leave_classroom = asyncHandler(async (req, res) => {
 
 export const get_all_classroom_overview_specific_instructor = asyncHandler(
   async (req, res) => {
-    const { instructor_id, classroom_id } = req.params; // Get the meal ID from the request parameters
+    const { instructor_id } = req.params; // Get the meal ID from the request parameters
 
     try {
       const instructor = await Instructor.findById(instructor_id);
-      // const classroom = await Classroom.findById(classroom_id);
+      const student_instructor = instructor ? null : await Student.findById(instructor_id);
 
-      if (!instructor)
-        return res.status(404).json({ message: "Instructor not found." });
-      // if (!classroom) return res.status(404).json({ message: 'Classroom not found.' });
+      if (!instructor && !student_instructor) return res.status(404).json({ message: "Instructor not found." });
 
       const classrooms = await Classroom.find({
-        instructor: instructor.id,
+        instructor: (instructor || student_instructor).id,
       });
 
       const results = await Promise.all(
@@ -225,110 +224,91 @@ export const get_all_classroom_overview_specific_instructor = asyncHandler(
         })
       );
 
-      // const materials = await Material.find({
-      //     classroom : classroom.id,
-      // });
-
-      // const students = await Student.find({
-      //     joined_classroom: classroom.id
-      // });
-
       return res.status(200).json({ data: results });
-
-      //return res.status(200).json({ data: {classrooms, students, materials} });
     } catch (error) {
       return res.status(500).json({ error: "Failed to get all classrooms." });
     }
   }
 );
 
-export const get_all_activities_specific_student_specific_classroom =
-  asyncHandler(async (req, res) => {
-    const { classroom_id, student_id } = req.params;
+export const get_all_activities_specific_student_specific_classroom = asyncHandler(async (req, res) => {
+  const { classroom_id, student_id } = req.params;
 
-    try {
-      const classroom = await Classroom.findById(classroom_id).populate(
-        "instructor"
-      );
-      const student = await Student.findById(student_id);
+  try {
+    const classroom = await Classroom.findById(classroom_id).populate(
+      "instructor"
+    );
+    const student = await Student.findById(student_id);
 
-      if (!classroom) {
-        return res.status(404).json({ message: "Classroom not found." });
-      }
-
-      if (!student) {
-        return res.status(404).json({ message: "Student not found." });
-      }
-
-      const main_activity = await MainActivity.find({
-        classroom: classroom.id,
-      });
-
-      const activity_answers = await MainAnswer.find({
-        student: student.id,
-      }).populate({
-        path: "main_activity",
-        populate: { path: "classroom", match: { _id: classroom.id } },
-      });
-
-      const main_answers = activity_answers.filter(
-        (answer) =>
-          answer.quiz?.classroom?._id.toString() === classroom.id.toString()
-      );
-
-      const all_activities = [...main_activity];
-      const all_answers = [...main_answers];
-
-      const answeredIds = [
-        ...new Set(
-          all_answers.map(
-            (answer) =>
-              answer.exam?.id ||
-              answer.quiz?.id ||
-              answer.activity?.id ||
-              answer.assignment?.id
-          )
-        ),
-      ];
-
-      const answered_activities = all_activities
-        .filter((activity) => answeredIds.includes(activity.id))
-        .map((activity) => {
-          const matchedAnswer = all_answers.find((answer) => {
-            const answerId =
-              answer.exam?.id ||
-              answer.quiz?.id ||
-              answer.activity?.id ||
-              answer.assignment?.id;
-            return activity.id === answerId;
-          });
-          return {
-            activity: activity,
-            answer: matchedAnswer,
-          };
-        });
-
-      const unanswered_activities = all_activities
-        .filter((activity) => !answeredIds.includes(activity.id))
-        .map((activity) => ({
-          activity: activity,
-          answer: null,
-        }));
-
-      const data = {
-        student: student,
-        all_activities,
-        answered_activities,
-        unanswered_activities,
-      };
-
-      return res.status(200).json({ data: data });
-    } catch (error) {
-      return res
-        .status(500)
-        .json({ error: "Failed to get all student activities." });
+    if (!classroom) {
+      return res.status(404).json({ message: "Classroom not found." });
     }
-  });
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    const main_activity = await MainActivity.find({
+      classroom: classroom.id,
+    });
+
+    const activity_answers = await MainAnswer.find({
+      student: student.id,
+    }).populate({
+      path: "main_activity",
+      populate: { path: "classroom", match: { _id: classroom.id } },
+    });
+
+    const main_answers = activity_answers.filter(
+      (answer) =>
+        answer.main_activity?.classroom?._id.toString() === classroom.id.toString()
+    );
+
+
+    const all_activities = [...main_activity];
+    const all_answers = [...main_answers];
+
+
+    const answered_activities = all_answers.filter((answer) =>
+      all_activities.some((activity) =>
+        answer.main_activity._id.toString() === activity._id.toString()
+      )
+    );
+
+    const unanswered_activities = all_activities.filter((activity) =>
+      !all_answers.some((answer) =>
+        answer.main_activity._id.toString() === activity._id.toString()
+      )
+    );
+
+
+
+    // const answered_activities = all_activities.filter((activity) =>
+    //   all_answers.some((answer) =>
+    //     answer.main_activity._id.toString() === activity._id.toString()
+    //   )
+    // );
+
+    // const unanswered_activities = all_activities.filter((activity) =>
+    //   !all_answers.some((answer) =>
+    //     answer.main_activity._id.toString() === activity._id.toString()
+    //   )
+    // );
+
+    const data = {
+      student: student,
+      all_activities,
+      unanswered_activities,
+      answered_activities,
+    };
+
+    return res.status(200).json({ data: data });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Failed to get all student activities." });
+  }
+});
 
 export const get_all_classroom_student = asyncHandler(async (req, res) => {
   const { classroom_id } = req.params; // Get the meal ID from the request parameters
@@ -401,7 +381,10 @@ export const get_specific_classroom = asyncHandler(async (req, res) => {
 
 export const get_all_classroom = asyncHandler(async (req, res) => {
   try {
-    const classrooms = await Classroom.find().populate("instructor");
+    const classrooms = await Classroom.find()
+    .populate("instructor")
+    .populate("student_instructor");
+    
     return res.status(200).json({ data: classrooms });
   } catch (error) {
     return res.status(500).json({ error: "Failed to get all classrooms." });
@@ -435,17 +418,17 @@ export const get_all_classroom_specific_instructor = asyncHandler(
 
     try {
       const instructor = await Instructor.findById(instructor_id);
+      const student_instructor = instructor ? null : await Student.findById(instructor_id);
 
-      if (!instructor)
-        return res.status(404).json({ message: "Instructor not found." });
+      if (!instructor && !student_instructor) return res.status(404).json({ message: "Instructor not found." });
 
       const unhide_classrooms = await Classroom.find({
-        instructor: instructor.id,
+        instructor: (instructor || student_instructor).id,
         is_hidden: 0,
       }).populate("instructor");
 
       const hidden_classrooms = await Classroom.find({
-        instructor: instructor.id,
+        instructor: (instructor || student_instructor).id,
         is_hidden: 1,
       }).populate("instructor");
 
